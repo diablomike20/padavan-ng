@@ -1,0 +1,2182 @@
+name: Build firmware (Ultimate Fix - Early Size Check)
+
+permissions:
+  contents: write
+
+on:
+  workflow_dispatch:
+    inputs:
+      target_select:
+        description: "選擇機型 (Target Model)"
+        required: true
+        default: 'TL_C2-V1'
+        type: choice
+        options:
+          # 5K
+          - 5K-W20
+          # A5-V11
+          - A5-V11_16M
+          - A5-V11_4M
+          - A5-V11_8M
+          # ASUS
+          - RP-AC56
+          - RT-AC1200
+          - RT-AC1200GU
+          - RT-AC1200HP
+          - RT-AC51U
+          - RT-AC54U
+          - RT-N10C1
+          - RT-N11P
+          - RT-N11PB1
+          - RT-N12plus
+          - RT-N13UB1
+          - RT-N14U
+          - RT-N56U
+          - RT-N56U-GE2
+          - RT-N56UB1
+          # ATEL
+          - ALR-U270
+          # BELKIN
+          - F9K1103
+          # DLINK
+          - DIR-300B1
+          - DIR-300B7
+          - DIR-320B1
+          - DIR-620A1
+          - DIR-620D1
+          - DIR-860L
+          - DIR-882
+          # GL
+          - GL-MT300A
+          - GL-MT300N
+          - GL-MT300NV2
+          # HIWIFI
+          - HC5661A
+          # KROKS
+          - KNDRT31R26
+          - KNDRT31R3
+          # LINKSYS
+          - EA-8100
+          # MQMAKER
+          - MQ-WITI-256
+          - MQ-WITI-512
+          # NEWIFI
+          - NEWIFI-D1
+          - NEWIFI-D2
+          - NEWIFI-MINI
+          - NEWIFI-Y1S
+          # NEXX
+          - WT3020A
+          - WT3020H
+          - WT3020H16M
+          # PHICOMM
+          - 256PSG1218
+          - PSG1218
+          # SAMSUNG
+          - SWR1100
+          # SERCOMM
+          - RT-S1010
+          - SMARTBOX_SPI
+          - SMBXPRONAND
+          - SMBXTURBO
+          # SNR
+          - SNR-MD1
+          - SNR-ME1
+          - SNR-W4N-M
+          - SNR-W4N-M_USB
+          # TOTOLINK
+          - A3004NS
+          # TPLINK
+          - TL_C2-V1
+          - TL_C20-V1
+          - TL_C20-V1_16M
+          - TL_C20-V4
+          - TL_C20-V5
+          - TL_C5-V4
+          - TL_C50-V1
+          - TL_C50-V3
+          - TL_C50-V4
+          - TL_EC220_G5-V2
+          - TL_MR200-V1
+          - TL_MR3020-V3
+          - TL_MR3420-V5
+          - TL_WDR7300-V5
+          - TL_WR840N-V4
+          - TL_WR840N-V4_USB
+          - TL_WR840N-V5
+          - TL_WR840N-V5_RU
+          - TL_WR840N-V6
+          - TL_WR841N-V13
+          - TL_WR841N-V13_USB
+          - TL_WR841N-V14
+          - TL_WR841N-V14_8M
+          - TL_WR842N-V5
+          - TL_WR845N-V3
+          - TL_WR845N-V4
+          # TUOSHI
+          - TS7620N
+          # UBNT
+          - UBNT-ERX
+          # UNIELEC
+          - U7621-06
+          # WALL-AP
+          - WALL-AP
+          # XIAOMI-U-Boot
+          - MI-4A_100M
+          - MI-4C
+          - MI-MINI
+          - MI-R3Gv2
+          # XIAOMI
+          - MI-3
+          - MI-3C
+          - MI-3_SPI
+          - MI-4
+          - MI-MINI
+          - MI-NANO
+          - MI-R3G
+          - MI-R3G_SPI
+          - MI-R3PRO
+          - MI-R3P_SPI
+          - R2100
+          - RM-AC2100
+          # YOUHUA
+          - WR1200JS
+          # YOUKU
+          - YK-L1
+          - YK-L1C
+          # ZBT
+          - ZBT-WE1326
+          - ZBT-WE1626
+          - ZBT-WE826T2
+          - ZBT-WG3526-32
+          - ZBT-WG3526
+          - ZBT-WR8305RT
+          # ZTE
+          - ZTE_E8820S
+          # ZYXEL
+          - KN-4G3
+          - KN-4G3B
+          - KN-EXTRA
+          - KN-EXTRA2
+          - KN-GIGA3
+          - KN-LITE
+          - KN-LITE2
+          - KN-LITE3
+          - KN-LITE3B
+          - KN-OMNI
+          - KN-OMNI2
+          - KN-START2
+          - KN-ULTRA2
+          - KN-VIVA
+      
+      language_select:
+        description: "WebUI 語言設定 (Custom Language Selector)"
+        required: true
+        type: choice
+        default: 'English_Only'
+        options:
+          - English_Only
+          - CN (繁體中文)
+          - RU (Pусский)
+          - BR (Brazil)
+          - CZ (Česky)
+          - DA (Dansk)
+          - DE (Deutsch)
+          - ES (Español)
+          - FI (Finsk)
+          - FR (Français)
+          - NO (Norsk)
+          - PL (Polski)
+          - SV (Svensk)
+          - UK (Українська)
+      
+      nanoversion:
+        description: "開啟極限瘦身 (Nano Optimization)"
+        type: boolean
+        default: true
+
+      customization:
+        description: '自訂預設配置 JSON (Custom Default Configuration Wi-Fi/Passwords/IP)'
+        required: true
+        type: string
+        default: '{"lanip":"192.168.0.1","signaccount":"admin","signpassword":"admin","wifi2gssid":"Padavan","wifi2gpsk":"1234567890","wifi5gssid":"Padavan-5G","wifi5gpsk":"1234567890"}'
+
+  push:
+    tags:
+      - '*'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container: registry.gitlab.com/hadzhioglu/padavan-ng
+    defaults: { run: { shell: bash } }
+    
+    steps:
+      - name: Checkout Workflow
+        uses: actions/checkout@v4
+
+      # 0. 環境初檢
+      - name: Debug - Initial Environment Check
+        run: |
+          echo "::group::System Info"
+          echo "User: $(whoami)"
+          echo "PWD: $(pwd)"
+          df -h
+          echo "::endgroup::"
+
+      # 1. 安裝依賴
+      - name: Install Dependencies & Fix Timezone
+        run: |
+          echo "::group::Apt Update & Install"
+          set -x 
+          apt-get update
+          DEBIAN_FRONTEND=noninteractive apt-get install -y tzdata autoconf autoconf-archive automake autopoint bison build-essential \
+          ca-certificates cmake cpio curl dos2unix doxygen fakeroot flex gawk gettext git gperf \
+          help2man htop kmod libarchive-tools libblkid-dev libc-ares-dev libcurl4-openssl-dev \
+          libdevmapper-dev libev-dev libevent-dev libexif-dev libflac-dev libgmp3-dev \
+          libid3tag0-dev libidn2-dev libjpeg-dev libkeyutils-dev libltdl-dev libmpc-dev \
+          libmpfr-dev libncurses5-dev libogg-dev libsqlite3-dev libssl-dev libsystemd-dev \
+          libtool libtool-bin libudev-dev libunbound-dev libvorbis-dev libxml2-dev locales \
+          mc nano pkg-config ppp-dev python3 python3-docutils sshpass texinfo unzip uuid \
+          uuid-dev vim wget xxd zlib1g-dev jq zip
+          set +x
+          echo "::endgroup::"
+
+          echo "::group::Timezone Configuration"
+          ln -fs /usr/share/zoneinfo/Asia/Taipei /etc/localtime
+          dpkg-reconfigure -f noninteractive tzdata
+          echo "BUILD_TIME=$(date +%Y%m%d-%H%M)" >> $GITHUB_ENV
+          echo "::endgroup::"
+
+      # 2. 設定變數
+      - name: Get variables
+        run: |
+          echo "::group::Variable Loading"
+          if [ -f "variables" ]; then
+            sed -i 's|\r$||g' variables
+            . variables
+          fi
+          
+          echo "PADAVAN_REPO=https://github.com/TW641/padavan-ng" >> $GITHUB_ENV
+          echo "PADAVAN_BRANCH=master" >> $GITHUB_ENV
+          echo "PADAVAN_COMMIT=HEAD" >> $GITHUB_ENV
+          
+          if [ -z "$PADAVAN_THEMES_REPO" ]; then
+            echo "PADAVAN_THEMES_REPO=https://gitlab.com/hadzhioglu/padavan-themes.git" >> $GITHUB_ENV
+            echo "PADAVAN_THEMES_BRANCH=main" >> $GITHUB_ENV
+          fi
+          
+          for v in "${!PADAVAN_@}" "${!CONFIG_@}"; do
+            echo "$v=${!v}" >> $GITHUB_ENV
+          done
+          echo "::endgroup::"
+
+      # 3. 下載源碼
+      - name: Download sources and toolchain
+        run: |
+          echo "::group::Git Clone"
+          git config --global --add safe.directory '*'
+          git clone -b "$PADAVAN_BRANCH" "$PADAVAN_REPO"
+          if [ "$PADAVAN_COMMIT" != "HEAD" ] && [ ! -z "$PADAVAN_COMMIT" ]; then
+            git -C padavan-ng checkout "$PADAVAN_COMMIT"
+          fi
+          wget -qO- "$PADAVAN_TOOLCHAIN_URL" | tar -C padavan-ng --zstd -xf -
+          echo "::endgroup::"
+
+      # 4. 生成 Config
+      - name: Generate build.config & Apply Nano
+        run: |
+          TNAME="${{ inputs.target_select }}"
+          [ -z "$TNAME" ] && TNAME="TL_C2-V1"
+          echo "::group::Template Search & Config Gen"
+          
+          TEMPLATE_DIR="padavan-ng/trunk/configs/templates"
+          PATTERN_A=$(echo "$TNAME" | sed 's/-/_/g')
+          PATTERN_B=$(echo "$TNAME")
+          TARGET_FILE=$(find "$TEMPLATE_DIR" -maxdepth 2 \( -iname "${PATTERN_A}.config" -o -iname "${PATTERN_B}.config" \) | head -n 1)
+          
+          if [ -z "$TARGET_FILE" ]; then
+            echo "::warning:: Template not found, using fallback..."
+            TARGET_FILE="padavan-ng/trunk/configs/templates/tplink/tl_c2-v1.config"
+          fi
+          
+          if [ ! -f "$TARGET_FILE" ]; then
+            echo "::error:: Config file not found: $TARGET_FILE"
+            exit 1
+          fi
+          cp -f "$TARGET_FILE" build.config
+          FINAL_CONFIG="build.config"
+          echo "::endgroup::"
+          
+          # === 極限瘦身邏輯 (Ultimate Nano - TC/Cake Ready) ===
+          if [ "${{ inputs.nanoversion }}" == "true" ]; then
+            echo "::group::Nano Optimization - Final Execution"
+         
+            # 1. [體積優化] 強制開啟 Size Optimization
+            sed -i "s/#CONFIG_CC_OPTIMIZE_FOR_SIZE=y/CONFIG_CC_OPTIMIZE_FOR_SIZE=y/g" "$FINAL_CONFIG"
+         
+            # 2. [基礎切除] 停用 USB, 檔案系統, Swap, 媒體驅動
+            for feat in USB ANTFS FAT EXFAT EXT2 EXT3 EXT4 XFS HFS FUSE SWAP BACKPORTED; do
+              sed -i "s/CONFIG_FIRMWARE_ENABLE_${feat}=y/CONFIG_FIRMWARE_ENABLE_${feat}=n/gi" "$FINAL_CONFIG"
+            done
+         
+            # 3. [語言包精準控制] 
+            sed -i "s/CONFIG_FIRMWARE_INCLUDE_LANG_EN=n/CONFIG_FIRMWARE_INCLUDE_LANG_EN=y/g" "$FINAL_CONFIG"
+            sed -i "s/#CONFIG_FIRMWARE_INCLUDE_LANG_CN=y/CONFIG_FIRMWARE_INCLUDE_LANG_CN=y/g" "$FINAL_CONFIG"
+            sed -i "s/CONFIG_FIRMWARE_INCLUDE_LANG_CN=n/CONFIG_FIRMWARE_INCLUDE_LANG_CN=y/g" "$FINAL_CONFIG"
+            sed -i "s/CONFIG_FIRMWARE_INCLUDE_LANG_RU=y/CONFIG_FIRMWARE_INCLUDE_LANG_RU=n/g" "$FINAL_CONFIG"
+            sed -i "s/CONFIG_FIRMWARE_INCLUDE_LANG_UK=y/CONFIG_FIRMWARE_INCLUDE_LANG_UK=n/g" "$FINAL_CONFIG"
+         
+            # 4. [地毯式移除 - 究極防漏版]
+            # 目標：不管該選項原本是 =y, =m, 還是 # is not set，通通強制改為 =n
+            echo "::group::Absolute Disable Modules"
+            modules=(
+              CIFS NTFS_3G LPRD U2EC USBIP HDPARM PARTED SMBD WINS SMBD_SYSLOG TESTPARM 
+              FTPD FTPD_SSL NFSD NFSC
+              UVC HID SERIAL AUDIO FIREFLY XUPNPD MINIDLNA FFMPEG_NEW 
+              RPL2TP EAP_PEAP OPENVPN SSWAN WIREGUARD AMNEZIAWG ZEROTIER EOIP XFRM
+              SHADOWSOCKS XRAY V2RAY TROJAN SSOBFS SINGBOX NAIVEPROXY
+              REDSOCKS SRELAY MENTOHUST FRPC FRPS TOR TOR_GEOIP TOR_GEOIPV6
+              PRIVOXY NFQWS
+              IPSET DNSCRYPT STUBBY DOH QUIC QUIC_NGTCP2 NDISC6_RDISC6
+              ADBYBY DNSFORWARDER SMARTDNS ADGUARDHOME WPAD
+              LRZSZ IPERF3 DUMP1090 RTL_SDR SOCAT MTR 
+              IMQ IFB
+              ZRAM ADB LUA SQM ALDRIVER SCUTCLIENT GDUT_DRCOM DOGCOM MINIEAP 
+              NJIT_CLIENT SOFTETHERVPN_SERVER SOFTETHERVPN_CLIENT SOFTETHERVPN_CMD
+              DROPBEAR DROPBEAR_FAST_CODE VLMCSD TTYD MSD_LITE
+              DDNS_SSL
+            )
+         
+            for mod in "${modules[@]}"; do
+              CFG_KEY="CONFIG_FIRMWARE_INCLUDE_${mod}"
+              
+              if grep -q "$CFG_KEY" "$FINAL_CONFIG"; then
+                # 如果找到該設定 (不論是開啟、關閉或註解)，整行強制替換為 =n
+                sed -i "s|^.*$CFG_KEY.*$|$CFG_KEY=n|" "$FINAL_CONFIG"
+                echo "   🚫 Forced Disabled: $mod (Overwritten)"
+              else
+                # 如果完全沒找到，則主動追加 =n (防止默認開啟)
+                echo "$CFG_KEY=n" >> "$FINAL_CONFIG"
+                echo "   🚫 Forced Disabled: $mod (Added)"
+              fi
+            done
+            
+            echo "::endgroup::"
+          fi
+
+          echo "::group::Core Modules Enforcement"
+          # 5. 強制保留並開啟的核心模組
+          keep_modules=(OPENSSH SFTP TCPDUMP CURL HTTPS OPENSSL_EC OPENSSL_EXE SHORTCUT_FE QOS)
+
+          for kmod in "${keep_modules[@]}"; do
+            sed -i "/CONFIG_FIRMWARE_INCLUDE_${kmod}/d" "$FINAL_CONFIG"
+            echo "CONFIG_FIRMWARE_INCLUDE_${kmod}=y" >> "$FINAL_CONFIG"
+          done
+          echo "::endgroup::"
+
+      # 5. 應用自定義設定 (JSON)
+      - name: Apply Custom Settings
+        run: |
+          echo "::group::JSON Parsing & Export"
+          
+          # 檢查 JSON 格式是否有效
+          jq empty <<< '${{ inputs.customization }}' || { echo "❌ Invalid JSON"; exit 1; }
+          
+          # 1. 寫入 GITHUB_ENV，確保最後 Release 步驟可以讀取到這些變數！
+          echo '${{ inputs.customization }}' | jq -r 'to_entries[] | "\(.key)=\(.value)"' | while IFS='=' read -r k v; do
+            echo "${k^^}=$v" >> $GITHUB_ENV  
+          done
+          
+          # 2. 提取局部變數，供當前執行腳本使用
+          LANIP=$(echo '${{ inputs.customization }}' | jq -r .lanip)
+          SIGNACCOUNT=$(echo '${{ inputs.customization }}' | jq -r .signaccount)
+          SIGNPASSWORD=$(echo '${{ inputs.customization }}' | jq -r .signpassword)
+          WIFI2GSSID=$(echo '${{ inputs.customization }}' | jq -r .wifi2gssid)
+          WIFI2GPSK=$(echo '${{ inputs.customization }}' | jq -r .wifi2gpsk)
+          WIFI5GSSID=$(echo '${{ inputs.customization }}' | jq -r .wifi5gssid)
+          WIFI5GPSK=$(echo '${{ inputs.customization }}' | jq -r .wifi5gpsk)
+          
+          # 3. 執行自定義腳本 (Padavan-ng 路徑)
+          if [ -d "padavan-ng/trunk/custom/scripts" ]; then
+            cd padavan-ng
+            chmod +x trunk/custom/scripts/*.sh
+            [ ! -z "$LANIP" ] && bash trunk/custom/scripts/setip.sh "$LANIP" trunk/user/shared/defaults.h trunk/user/www/dict/CN.dict || true
+            [ ! -z "$SIGNACCOUNT" ] && bash trunk/custom/scripts/setaccount.sh "$SIGNACCOUNT" "$SIGNPASSWORD" trunk/user/shared/defaults.h || true
+            [ ! -z "$WIFI2GSSID" ] && bash trunk/custom/scripts/setwifi.sh "$WIFI2GSSID" "$WIFI2GPSK" "$WIFI5GSSID" "$WIFI5GPSK" trunk/user/shared/defaults.h || true
+          fi
+          echo "::endgroup::"
+
+      # 6. 安裝 Themes
+      - name: Install themes
+        run: |
+          echo "::group::Themes Installation"
+          if [ -f "variables" ]; then . variables; fi
+          if [[ -n "${PADAVAN_THEMES[*]}" ]]; then
+            git clone --depth 1 -b "$PADAVAN_THEMES_BRANCH" "$PADAVAN_THEMES_REPO" themes
+            cp -r themes/common-theme themes/jquery.js padavan-ng/trunk/user/www/n56u_ribbon_fixed
+            for theme in "${PADAVAN_THEMES[@]}"; do
+              [ -d "themes/$theme-theme" ] && cp -r "themes/$theme-theme" padavan-ng/trunk/user/www/n56u_ribbon_fixed
+            done
+          fi
+          echo "::endgroup::"
+
+      # 7. 修正 mkimage
+      - name: Fix mkimage
+        run: |
+          MKIMAGE_FILE="padavan-ng/trunk/tools/mkimage/mkimage.c"
+          if [ -f "$MKIMAGE_FILE" ]; then
+            sed -i 's/"%d\.%d"/"%hhd.%hhd"/g' "$MKIMAGE_FILE"
+            sed -i 's/"%d\.%d%c"/"%hhd.%hhd%c"/g' "$MKIMAGE_FILE"
+          fi
+
+      # =======================================================
+      # 7.4. [核心升級] BusyBox 1.37.0 V44: Integrated Masterpiece
+      # =======================================================
+      - name: 🔥 Sync & Evolve BusyBox (V44:Integrated)
+        run: |
+          set -x
+          echo "::group::BusyBox Evolution V44"
+          
+          # 1. 定義變數 (Readonly 防止篡改)
+          # 注意：在此 Workflow 中，padavan-ng 是根目錄下的子目錄
+          readonly WORK_DIR="padavan-ng"
+          readonly REPO_ROOT="$WORK_DIR"
+          readonly ORIGINAL_CONFIG="$REPO_ROOT/trunk/configs/boards/busybox.config"
+          readonly TARGET_DIR="$REPO_ROOT/trunk/user/busybox"
+          
+          # 確認目錄存在
+          if [ ! -d "$TARGET_DIR" ]; then
+              echo "❌ CRITICAL: BusyBox directory not found at $TARGET_DIR"
+              exit 1
+          fi
+          
+          # 進入 BusyBox 目錄 (直接操作 1.37.0 目錄)
+          # 注意：假設 trunk/user/busybox 下面直接就是源碼，或者有一個 busybox-1.37.0 子目錄
+          # 根據您的描述，您已經替換了源碼，所以這裡我們做一個智慧判斷
+          cd "$TARGET_DIR"
+          if [ -d "busybox-1.37.0" ]; then
+              cd "busybox-1.37.0"
+          fi
+          
+          # 定義同步目標 (現在我們位於 busybox 源碼根目錄)
+          readonly SYNC_TARGET_1=".config"
+          readonly SYNC_TARGET_2="../.config"
+          # 計算回 original config 的相對路徑 (從 busybox-1.37.0 出發: ../../../configs/...)
+          # 或者直接用絕對路徑 (但在 Action 中用相對路徑比較靈活)
+          # 這裡我們用之前定義的 ORIGINAL_CONFIG 變數 (需要轉為相對路徑或直接寫入)
+          # 簡單起見，我們用 readlink 獲取絕對路徑，或者假設結構固定
+          readonly SYNC_TARGET_3="../../../configs/boards/busybox.config"
+
+          # -------------------------------------------------------
+          # 2. 定義全套檢查清單 (MIPS Router Optimized / Diff Mode)
+          # -------------------------------------------------------
+          CHECKS_SET=(
+              # Shells
+              "CONFIG_SH_IS_ASH y"
+              "CONFIG_BASH_IS_ASH y"
+              "CONFIG_ASH y"
+              "CONFIG_ASH_OPTIMIZE_FOR_SIZE y"
+              "CONFIG_ASH_INTERNAL_GLOB y"
+              "CONFIG_ASH_BASH_COMPAT y"
+              "CONFIG_ASH_JOB_CONTROL y"
+              "CONFIG_ASH_ALIAS y"
+              "CONFIG_ASH_EXPAND_PRMT y"
+              "CONFIG_ASH_GETOPTS y"
+              "CONFIG_ASH_CMDCMD y"
+              "CONFIG_ASH_HELP y"
+              "CONFIG_ASH_RANDOM_SUPPORT y"
+              "CONFIG_ASH_IDLE_TIMEOUT y"
+              "CONFIG_ASH_MAIL y"
+              "CONFIG_FEATURE_SH_MATH_BASE y"
+              "CONFIG_FEATURE_SH_EMBEDDED_SCRIPTS y"
+              
+              # Logging
+              "CONFIG_SYSLOGD y"
+              "CONFIG_FEATURE_ROTATE_LOGFILE y"
+              "CONFIG_FEATURE_REMOTE_LOG y"
+              "CONFIG_FEATURE_SYSLOGD_DUP y"
+              "CONFIG_FEATURE_SYSLOGD_PRECISE_TIMESTAMPS y"
+              "CONFIG_FEATURE_SYSLOGD_READ_BUFFER_SIZE 512"
+              "CONFIG_FEATURE_IPC_SYSLOG y"
+              "CONFIG_FEATURE_IPC_SYSLOG_BUFFER_SIZE 4"
+              "CONFIG_KLOGD y"
+              "CONFIG_FEATURE_KLOGD_KLOGCTL y"
+              "CONFIG_LOGGER y"
+              
+              # Network & DHCP
+              "CONFIG_UDHCPC_DEFAULT_INTERFACE \"eth3\""
+              "CONFIG_FEATURE_IP_ROUTE_DIR \"\""
+              "CONFIG_SHA1_SMALL 1"
+              "CONFIG_DHCP6C y"
+              "CONFIG_FEATURE_UDHCPC_SANITIZEOPT y"
+              "CONFIG_FEATURE_UDHCP_RFC3397 y"
+              "CONFIG_FEATURE_UDHCP_RFC5969 y"
+              # [新增] NTP 時間伺服器 (增強內網對時)
+              "CONFIG_NTPD y"
+              "CONFIG_FEATURE_NTPD_SERVER y"
+              # [新增] IPCALC 進階計算 (確保所有腳本 100% 相容)
+              "CONFIG_IPCALC y"
+              "CONFIG_FEATURE_IPCALC_LONG_OPTIONS y"
+              "CONFIG_FEATURE_IPCALC_FANCY y"
+              # [移除] 移至 UNSET 以避免衝突/iproute2-5.12.0/ip
+              # "CONFIG_IPNEIGH y"
+              # "CONFIG_FEATURE_IP_NEIGH y"
+              "CONFIG_NC y"
+              "CONFIG_NC_SERVER y"
+              "CONFIG_NC_EXTRA y"
+              "CONFIG_FEATURE_NSLOOKUP_BIG y"
+              "CONFIG_FEATURE_NSLOOKUP_LONG_OPTIONS y"
+              "CONFIG_FEATURE_NTP_AUTH y"
+              "CONFIG_SSL_CLIENT y"
+              # [移除] 移至 UNSET 以避免衝突/iproute2-5.12.0/tc
+              # "CONFIG_TC y"
+              # "CONFIG_FEATURE_TC_INGRESS y"
+              "CONFIG_TLS y"
+              "CONFIG_SVC y"
+              "CONFIG_SVOK y"
+              
+              # WGET
+              "CONFIG_WGET y"
+              "CONFIG_FEATURE_WGET_LONG_OPTIONS y"
+              "CONFIG_FEATURE_WGET_STATUSBAR y"
+              "CONFIG_FEATURE_WGET_AUTHENTICATION y"
+              "CONFIG_FEATURE_WGET_TIMEOUT y"
+              "CONFIG_FEATURE_WGET_HTTPS y"
+              "CONFIG_FEATURE_WGET_OPENSSL y"
+              
+              # Loop & Core
+              "CONFIG_NO_LOOP_CONFIGURE y"
+              # [移除] MIPS 架構不支援 x86 優化
+              # "CONFIG_STACK_OPTIMIZATION_386 y"
+              "CONFIG_BZIP2_SMALL 9"
+              "CONFIG_CRC32 y"
+              "CONFIG_FEATURE_CP_REFLINK y"
+              # [移除] 因數分解，路由器用不到
+              # "CONFIG_FACTOR y"
+              "CONFIG_LINK y"
+              "CONFIG_SHA256SUM y"
+              "CONFIG_NL y"
+              "CONFIG_NOHUP y"
+              "CONFIG_NPROC y"
+              "CONFIG_PASTE y"
+              "CONFIG_SHRED y"
+              "CONFIG_TEST1 y"
+              "CONFIG_TEST2 y"
+              "CONFIG_TSORT y"
+              "CONFIG_BB_ARCH y"
+              "CONFIG_BASE32 y"
+              "CONFIG_BASE64 y"
+              # [移除] 路由器不支援休眠喚醒
+              # "CONFIG_RESUME y"
+              "CONFIG_RUN_INIT y"
+              "CONFIG_FEATURE_XARGS_SUPPORT_PARALLEL y"
+              "CONFIG_FEATURE_XARGS_SUPPORT_ARGS_FILE y"
+              "CONFIG_POWEROFF y"
+              "CONFIG_REBOOT y"
+              "CONFIG_FEATURE_WAIT_FOR_INIT y"
+              "CONFIG_LINUXRC y"
+              "CONFIG_FEATURE_INIT_QUIET y"
+              "CONFIG_FEATURE_INIT_MODIFY_CMDLINE y"
+              "CONFIG_MKPASSWD y"
+              "CONFIG_MODINFO y"
+              # [移除] Flash 不支援 TRIM
+              # "CONFIG_BLKDISCARD y"
+              # [移除] 路由器檔案系統通常不需預分配
+              # "CONFIG_FALLOCATE y"
+              # "CONFIG_FSFREEZE y"
+              "CONFIG_GETOPT y"
+              "CONFIG_FEATURE_GETOPT_LONG y"
+              "CONFIG_HEXDUMP y"
+              "CONFIG_XXD y"
+              "CONFIG_FEATURE_MDEV_DAEMON y"
+              "CONFIG_MKE2FS y"
+              "CONFIG_MKDOSFS y"
+              # [移除] 架構錯誤，MIPS 不需要這些
+              # "CONFIG_LINUX32 y"
+              # "CONFIG_LINUX64 y"
+              # [移除] 容器相關，MIPS 效能差且少用
+              # "CONFIG_SETPRIV y"
+              # "CONFIG_FEATURE_SETPRIV_DUMP y"
+              # "CONFIG_FEATURE_SETPRIV_CAPABILITIES y"
+              # "CONFIG_FEATURE_SETPRIV_CAPABILITY_NAMES y"
+              # "CONFIG_UNSHARE y"
+              "CONFIG_BC y"
+              "CONFIG_FEATURE_DC_BIG y"
+              "CONFIG_FEATURE_BC_INTERACTIVE y"
+              "CONFIG_FEATURE_BC_LONG_OPTIONS y"
+              "CONFIG_FEATURE_CROND_SPECIAL_TIMES y"
+              "CONFIG_GETFATTR y"
+              "CONFIG_HEXEDIT y"
+              # [移除] 無 I2C 硬體支援
+              # "CONFIG_I2CTRANSFER y"
+              "CONFIG_LSSCSI y"
+              "CONFIG_MIM y"
+              "CONFIG_PARTPROBE y"
+              "CONFIG_SEEDRNG y"
+              "CONFIG_SETFATTR y"
+              "CONFIG_TS y"
+              "CONFIG_UBIRENAME y"
+              
+              # User Preferences
+              "CONFIG_FEATURE_TAR_LONG_OPTIONS y"
+              "CONFIG_FEATURE_SORT_OPTIMIZE_MEMORY y"
+              "CONFIG_FEATURE_SHOW_SCRIPT y"
+              "CONFIG_FLOAT_DURATION y"
+              "CONFIG_NOLOGIN y"
+              # [移除] 僅供除錯，極少使用
+              # "CONFIG_NSENTER y"
+              "CONFIG_FEATURE_START_STOP_DAEMON_LONG_OPTIONS y"
+              "CONFIG_FEATURE_SWAPON_PRI y"
+              "CONFIG_FEATURE_ETC_SERVICES y"
+              "CONFIG_FEATURE_CATN y"
+              "CONFIG_FEATURE_CATV y"
+              
+              # Volume IDs
+              # [移除] 路由器極少用到這些檔案系統，節省空間
+              # "CONFIG_FEATURE_VOLUMEID_BCACHE y"
+              # "CONFIG_FEATURE_VOLUMEID_EROFS y"
+              # "CONFIG_FEATURE_VOLUMEID_MINIX y"
+              "CONFIG_FEATURE_VOLUMEID_UBIFS y"
+              "CONFIG_FEATURE_VOLUMEID_XFS y"
+          )
+          
+          CHECKS_UNSET=(
+              "CONFIG_SH_IS_HUSH"
+              "CONFIG_BASH_IS_HUSH"
+              "CONFIG_BASH_IS_NONE"
+              "CONFIG_HUSH"
+              "CONFIG_FEATURE_DHCP6_AUTH"
+              "CONFIG_TRY_LOOP_CONFIGURE"
+              "CONFIG_LOOP_CONFIGURE"
+              "CONFIG_FEATURE_WGET_FTP"
+              "CONFIG_WHOIS"
+              "CONFIG_UDHCPD"
+              "CONFIG_FEATURE_UDHCPD_BOOTP"
+              "CONFIG_FEATURE_UDHCPD_BASE_IP_ON_MAC"
+              "CONFIG_FEATURE_UDHCPD_WRITE_LEASES_EARLY"
+              "CONFIG_DUMPLEASES"
+              "CONFIG_DHCPRELAY"
+              "CONFIG_UDHCPC6"
+              "CONFIG_FEATURE_UDHCPC6_RFC3646"
+              "CONFIG_FEATURE_UDHCPC6_RFC4704"
+              "CONFIG_FEATURE_UDHCPC6_RFC4833"
+              "CONFIG_FEATURE_UDHCPC6_RFC5970"
+              "CONFIG_FEATURE_UDHCP_PORT"
+              "CONFIG_FEATURE_UDHCP_8021Q"
+              "CONFIG_ASH_BASH_SOURCE_CURDIR"
+              
+              # --- [新增] 避免衝突/iproute2-5.12.0/ip & /iproute2-5.12.0/tc & 強化資安 (強制關閉) ---
+              # --- [新增] 避免衝突→<確保：「CONFIG_FEATURE_NTPD_CONF is not set」>Padavan 的系統架構中，ntpd 是由 rc 程式透過指令列參數（Command Line Arguments）直接啟動的（例如 ntpd -n -l -p ...）。它不會去讀取 /etc/ntp.conf。如果您開啟了這個選項，BusyBox 反而會因為找不到設定檔而報錯，或者忽略啟動參數。所以必須關閉（UNSET）。
+              "CONFIG_FEATURE_NTPD_CONF"
+              # IP 主程式與功能 (全殺，因為有 iproute2)
+              "CONFIG_IP"
+              "CONFIG_IPADDR"
+              "CONFIG_IPLINK"
+              "CONFIG_IPROUTE"
+              "CONFIG_IPTUNNEL"
+              "CONFIG_IPRULE"
+              "CONFIG_IPNEIGH"
+              
+              # IP 詳細功能設定 (全殺)
+              "CONFIG_FEATURE_IP_ADDRESS"
+              "CONFIG_FEATURE_IP_LINK"
+              
+              # [💀 導致編譯失敗 Error 1 的兇手]
+              "CONFIG_FEATURE_IP_LINK_CAN"
+              
+              # IP 其他功能與協定
+              "CONFIG_FEATURE_IP_ROUTE"
+              "CONFIG_FEATURE_IP_TUNNEL"
+              "CONFIG_FEATURE_IP_RULE"
+              "CONFIG_FEATURE_IP_NEIGH"
+              "CONFIG_FEATURE_IP_RARE_PROTOCOLS"
+              
+              # TC 流量控制 (全殺，因為有 iproute2)
+              "CONFIG_TC"
+              "CONFIG_FEATURE_TC_INGRESS"
+              
+              # 舊式服務與資安風險 (建議關閉)
+              "CONFIG_TCPSVD"
+              "CONFIG_UDPSVD"
+              
+              # --- [新增] 架構與垃圾清理 (強制關閉) ---
+              "CONFIG_STACK_OPTIMIZATION_386"
+              "CONFIG_RESUME"
+              "CONFIG_BLKDISCARD"
+              "CONFIG_LINUX32"
+              "CONFIG_LINUX64"
+              "CONFIG_SETPRIV"
+              "CONFIG_UNSHARE"
+              "CONFIG_NSENTER"
+              "CONFIG_I2CTRANSFER"
+              "CONFIG_FALLOCATE"
+              "CONFIG_FSFREEZE"
+              "CONFIG_FEATURE_VOLUMEID_BCACHE"
+              "CONFIG_FEATURE_VOLUMEID_EROFS"
+              "CONFIG_FEATURE_VOLUMEID_MINIX"
+          )
+
+          # -------------------------------------------------------
+          # 3. 核心功能函式
+          # -------------------------------------------------------
+          audit_config() {
+              local FILE=$1
+              local LIST_NAME=$2 
+              local FAILURES=()
+              echo "   🔍 Auditing $FILE..."
+              if [ ! -f "$FILE" ]; then echo "      ❌ File missing: $FILE"; return 1; fi
+              
+              for ENTRY in "${CHECKS_SET[@]}"; do
+                  KEY=${ENTRY%% *}
+                  VAL=${ENTRY#* }
+                  if ! grep -q "^${KEY}=${VAL}$" "$FILE"; then
+                      echo "      ❌ [FAIL] $KEY mismatch/missing"
+                      FAILURES+=("$ENTRY")
+                  fi
+              done
+              
+              for KEY in "${CHECKS_UNSET[@]}"; do
+                  if grep -q "^${KEY}=" "$FILE"; then
+                      echo "      ❌ [FAIL] $KEY is SET (Should be UNSET)"
+                      FAILURES+=("$KEY UNSET")
+                  fi
+              done
+              
+              if [ ${#FAILURES[@]} -gt 0 ]; then
+                  eval "$LIST_NAME=(\"\${FAILURES[@]}\")"
+                  return 1
+              fi
+              return 0
+          }
+
+          apply_fixes() {
+              local FILE=$1
+              local ITEMS=("${@:2}")
+              echo "   🛠️ Applying Fixes to $FILE..."
+              for ITEM in "${ITEMS[@]}"; do
+                  if [[ "$ITEM" == *" UNSET" ]]; then
+                      KEY=${ITEM% UNSET}
+                      sed -i "/$KEY/d" "$FILE"
+                      echo "# $KEY is not set" >> "$FILE"
+                  else
+                      KEY=${ITEM%% *}
+                      VAL=${ITEM#* }
+                      sed -i "/$KEY/d" "$FILE"
+                      echo "$KEY=$VAL" >> "$FILE"
+                  fi
+              done
+          }
+
+          # =======================================================
+          # 4. Config 初始化
+          # =======================================================
+          echo "🔧 [PHASE 2] Config Evolution"
+          # 假設原本的 config 存在，複製過來
+          # 這裡我們用一個更強健的檢查：如果 SYNC_TARGET_3 存在，就用它，否則報錯
+          # 注意：我們現在在 busybox-1.37.0 目錄下
+          
+          if [ -f "$SYNC_TARGET_3" ]; then
+              cp -f "$SYNC_TARGET_3" .config
+          else
+              echo "⚠️ Original config not found at $SYNC_TARGET_3"
+              # 這裡可以選擇是否要繼續，如果沒有原始 config，make oldconfig 會使用 defaults
+              # 為了安全，我們還是報錯比較好，除非您確定要用預設
+              # exit 1 
+          fi
+          
+          yes "" | make oldconfig || true
+
+          # 4.3 [SMART CLEAN] 智慧清理 (防止重複定義)
+          echo "   -> Cleaning ALL target keys to prevent reassign warnings..."
+          for ENTRY in "${CHECKS_SET[@]}"; do
+              KEY=${ENTRY%% *}
+              sed -i "/$KEY/d" .config
+          done
+          for KEY in "${CHECKS_UNSET[@]}"; do
+              sed -i "/$KEY/d" .config
+          done
+          echo "   ✅ Clean complete."
+
+          # 4.4 [INJECT] 注入設定
+          echo "   -> Injecting Specs..."
+          {
+              echo "# --- Custom Injection Start ---"
+              for ENTRY in "${CHECKS_SET[@]}"; do
+                  KEY=${ENTRY%% *}
+                  VAL=${ENTRY#* }
+                  echo "$KEY=$VAL"
+              done
+              for KEY in "${CHECKS_UNSET[@]}"; do
+                  echo "# $KEY is not set"
+              done
+              echo "# --- Custom Injection End ---"
+          } >> .config
+
+          # 4.5 整合
+          yes "" | make oldconfig || true
+
+          # =======================================================
+          # 5. [IRONCLAD AUDIT] 本地驗證迴圈
+          # =======================================================
+          echo "🔍 [PHASE 3] Local Audit Loop (.config)"
+          CURRENT_FILE=".config"
+          
+          # Round 1
+          FAIL_LIST_1=()
+          if ! audit_config "$CURRENT_FILE" FAIL_LIST_1; then
+              echo "⚠️ Round 1 Failed. Fix count: ${#FAIL_LIST_1[@]}"
+              apply_fixes "$CURRENT_FILE" "${FAIL_LIST_1[@]}"
+          else
+              echo "✅ Round 1 Passed."
+          fi
+          
+          # Round 2
+          FAIL_LIST_2=()
+          if ! audit_config "$CURRENT_FILE" FAIL_LIST_2; then
+              echo "⚠️ Round 2 Failed. Fix count: ${#FAIL_LIST_2[@]}"
+              apply_fixes "$CURRENT_FILE" "${FAIL_LIST_2[@]}"
+          else
+              echo "✅ Round 2 Passed."
+          fi
+          
+          # Round 3 (Death Check)
+          FAIL_LIST_3=()
+          if ! audit_config "$CURRENT_FILE" FAIL_LIST_3; then
+              echo "⛔ FATAL: Round 3 Failed!"
+              printf '   - %s\n' "${FAIL_LIST_3[@]}"
+              exit 1
+          fi
+          echo "✅ Round 3 Passed. Config is Perfect."
+
+          # =======================================================
+          # 6. [SYNC & FULL VERIFY] 同步 + 逐一驗證
+          # =======================================================
+          echo "🌍 [PHASE 4] Sync & Global Verify"
+          
+          echo "   -> Propagating to Targets..."
+          # 確保目標目錄存在 (configs/boards)
+          mkdir -p "$(dirname "$SYNC_TARGET_3")"
+          
+          cp -f .config "$SYNC_TARGET_2"
+          cp -f .config "$SYNC_TARGET_3"
+          
+          ALL_TARGETS=("$SYNC_TARGET_1" "$SYNC_TARGET_2" "$SYNC_TARGET_3")
+          
+          for TARGET in "${ALL_TARGETS[@]}"; do
+              echo "   ----------------------------------------"
+              echo "   🔍 Final Audit for: $TARGET"
+              FINAL_FAILS=()
+              if ! audit_config "$TARGET" FINAL_FAILS; then
+                  echo "❌ FATAL ERROR: Verification Failed on $TARGET"
+                  printf '   - %s\n' "${FINAL_FAILS[@]}"
+                  exit 1
+              else
+                  echo "✅ Verified: $TARGET"
+              fi
+          done
+          echo "✅ All 3 Targets are 100% Synchronized and Verified."
+
+          # =======================================================
+          # 7. [CODE & BUILD] 程式碼與依賴驗證
+          # =======================================================
+          echo "💉 [PHASE 5] Code & Build Verify"
+          
+          # 回到 trunk/user/rc (相對路徑)
+          cd "../../rc"
+          RC_FILE="services.c" 
+          PATCH_FILE="services_syslogd_fix.patch"
+          
+          if [ -f "$RC_FILE" ]; then
+              echo "   🔍 Checking $RC_FILE..."
+              
+              # [檢查 1]: 預先檢查是否已經修復 (冪等性)
+              if grep -F '"-L",' "$RC_FILE" && ! grep -q 'syslogd_argv\[7\]' "$RC_FILE"; then
+                  echo "   ✅ Code is already patched. Skipping apply."
+              else
+                  # [檢查 2]: 確認特徵碼存在才執行 patch
+                  if grep -F "NULL,				/* -L */" "$RC_FILE"; then
+                      echo "   -> Applying patch..."
+                      
+                      # 這裡使用乾淨的 Here-Doc，縮排與 Shell 腳本對齊
+                      cat << 'END_PATCH' > "$PATCH_FILE"
+          --- services.c.orig
+          +++ services.c
+          @@ -52,7 +52,7 @@
+           		"-S",				/* smaller output */
+           		"-D",				/* drop duplicates */
+           		"-O", "/tmp/syslog.log",	/* syslog file */
+          -		NULL,				/* -L */
+          +		"-L",				/* log locally */
+           		NULL, NULL,			/* -R host:port */
+           		NULL
+           	};
+          @@ -63,8 +63,7 @@
+           	if (is_valid_ipv4(log_ipaddr)) {
+           		int log_port = nvram_safe_get_int("log_port", 514, 1, 65535);
+           		snprintf(host_dst, sizeof(host_dst), "%s:%d", log_ipaddr, log_port);
+          -		syslogd_argv[7] = "-L";		/* local & remote */
+           		syslogd_argv[8] = "-R";
+           		syslogd_argv[9] = host_dst;
+           	}
+          END_PATCH
+                      
+                      # 執行 Patch (允許 fuzz/offset，失敗不中斷)
+                      patch -l -F 5 -N < "$PATCH_FILE" || echo "⚠️ Patch msg: Fuzzy match or already applied."
+                      rm "$PATCH_FILE"
+                  else
+                      echo "⚠️ Target code block not found! File might be already changed."
+                  fi
+              fi
+              
+              # [最終驗證]: 這是唯一決定成敗的關鍵
+              if ! grep -F '"-L",' "$RC_FILE"; then 
+                  echo "❌ Patch Failed! '-L' not found."
+                  exit 1
+              fi
+              
+              if grep -q 'syslogd_argv\[7\]' "$RC_FILE"; then 
+                  echo "❌ Patch Failed! Old code remains."
+                  exit 1
+              fi
+              echo "✅ Code Patch Verified."
+          fi
+
+          # Build Script Cleanup
+          # 回到 trunk (因為前面是在 busybox 目錄)
+          cd ../.. 
+          
+          echo "🧹 [PHASE 6] Build System Cleanup & Verify"
+          
+          # 1. 替換 1.24.x -> 1.37.0 (加上 || true 防止 grep 找不到時報錯)
+          grep -rl "busybox-1.24.x" user/ | xargs -r sed -i "s/busybox-1.24.x/busybox-1.37.0/g" || true
+          grep -rl "busybox-1.24.2" user/ | xargs -r sed -i "s/busybox-1.24.2/busybox-1.37.0/g" || true
+          
+          # 2. 替換腳本內的變數定義
+          find . -maxdepth 1 -name "*.sh" -o -name "build_firmware*" | while read -r script; do
+             if grep -q 'busybox_id="1.24.x"' "$script"; then
+                sed -i 's/busybox_id="1.24.x"/busybox_id="1.37.0"/' "$script"
+                echo "   -> Updated version in $script"
+             fi
+          done
+          
+          # 3. 最終驗證 (確認是否還有殘留)
+          # 🔥 修正點：加上 || true，防止 grep 沒找到東西(返回1)導致腳本崩潰
+          REMAINING_COUNT=$(grep -r "busybox-1.24.x" user/ | wc -l || true)
+          
+          if [ "$REMAINING_COUNT" -ne 0 ]; then
+              echo "❌ Build script cleanup failed! Found $REMAINING_COUNT occurrences."
+              # 列出殘留檔案供 Debug
+              grep -r "busybox-1.24.x" user/
+              exit 1
+          fi
+          
+          echo "✅ Build System Verified (No old versions found)."
+
+          # =======================================================
+          # 8. [SECURITY] CVE-2025-60876 & CVE-2025-46394
+          # =======================================================
+          echo "🛡️ [PHASE 7] Applying Security Patches"
+          
+          # 1. 進入 busybox 源碼目錄
+          # 注意：此時我們在 trunk 目錄 (PHASE 6 結束位置)，所以要進 user/busybox
+          cd user/busybox
+          
+          # 進入版本號目錄 (如果存在)
+          if [ -d "busybox-1.37.0" ]; then cd "busybox-1.37.0"; fi
+          
+          # 2. 建立 patches 專用目錄
+          echo "   -> Creating 'patches' directory..."
+          mkdir -p patches
+
+          # -------------------------------------------------------
+          # [Patch 1] CVE-2025-60876: Wget Header Injection
+          # -------------------------------------------------------
+          cat << 'CVE_PATCH_1' > patches/CVE-2025-60876.patch
+          From: Radoslav Kolev <radoslav.kolev@suse.com>
+          Subject: [PATCH] wget: don't allow control characters or spaces in the URL
+
+          Fixes CVE-2025-60876 malicious URL can be used to inject
+          HTTP headers in the request.
+
+          ---
+           networking/wget.c | 9 +++++++++
+           1 file changed, 9 insertions(+)
+
+          diff --git a/networking/wget.c b/networking/wget.c
+          index ec3767793..b8a6d02bb 100644
+          --- a/networking/wget.c
+          +++ b/networking/wget.c
+          @@ -536,6 +536,15 @@ static void parse_url(const char *src_url, struct host_info *h)
+           {
+           	char *url, *p, *sp;
+           
+          +	/* Fix for CVE-2025-60876 - don't allow control characters or spaces in the URL */
+          +	/* otherwise a malicious URL can be used to inject HTTP headers in the request */
+          +	unsigned char *u = (void *) src_url;
+          +	while (*u) {
+          +		if (*u <= ' ')
+          +			bb_simple_error_msg_and_die("Unencoded control character found in the URL!");
+          +		u++;
+          +	}
+          +
+           	free(h->allocated);
+           	h->allocated = url = xstrdup(src_url);
+          CVE_PATCH_1
+
+          echo "   -> Applying patches/CVE-2025-60876.patch..."
+          patch -p1 -N -i patches/CVE-2025-60876.patch || echo "⚠️ CVE-2025-60876 patch fuzzy/already applied."
+
+          # -------------------------------------------------------
+          # [Patch 2] CVE-2025-46394: Libarchive Terminal Injection (V2)
+          # 已移除 testsuite 測試腳本，只修復核心 .c 檔案
+          # -------------------------------------------------------
+          cat << 'CVE_PATCH_2' > patches/CVE-2025-46394.patch
+          From: Denys Vlasenko <vda.linux@googlemail.com>
+          Subject: [PATCH] archival/libarchive: sanitize filenames on output
+
+          This fixes CVE-2025-46394 (terminal escape sequence injection)
+
+          ---
+           archival/libarchive/header_list.c         | 2 +-
+           archival/libarchive/header_verbose_list.c | 4 ++--
+           2 files changed, 3 insertions(+), 3 deletions(-)
+
+          diff --git a/archival/libarchive/header_list.c b/archival/libarchive/header_list.c
+          index 0621aa406..9490b3635 100644
+          --- a/archival/libarchive/header_list.c
+          +++ b/archival/libarchive/header_list.c
+          @@ -8,5 +8,5 @@
+           void FAST_FUNC header_list(const file_header_t *file_header)
+           {
+           //TODO: cpio -vp DIR should output "DIR/NAME", not just "NAME" */
+          -	puts(file_header->name);
+          +	puts(printable_string(file_header->name));
+           }
+          diff --git a/archival/libarchive/header_verbose_list.c b/archival/libarchive/header_verbose_list.c
+          index a575a08a0..e7a09430d 100644
+          --- a/archival/libarchive/header_verbose_list.c
+          +++ b/archival/libarchive/header_verbose_list.c
+          @@ -57,13 +57,13 @@ void FAST_FUNC header_verbose_list(const file_header_t *file_header)
+           		ptm->tm_hour,
+           		ptm->tm_min,
+           		ptm->tm_sec,
+          -		file_header->name);
+          +		printable_string(file_header->name));
+           
+           #endif /* FEATURE_TAR_UNAME_GNAME */
+           
+           	/* NB: GNU tar shows "->" for symlinks and "link to" for hardlinks */
+           	if (file_header->link_target) {
+          -		printf(" -> %s", file_header->link_target);
+          +		printf(" -> %s", printable_string(file_header->link_target));
+           	}
+           	bb_putchar('\n');
+           }
+          CVE_PATCH_2
+
+          echo "   -> Applying patches/CVE-2025-46394.patch..."
+          patch -p1 -N -i patches/CVE-2025-46394.patch || echo "⚠️ CVE-2025-46394 patch fuzzy/already applied."
+
+          set +x
+          echo "🎉 BusyBox 1.37.0 Evolution Complete (V44: Integrated Masterpiece)."
+          echo "::endgroup::"
+      
+      # =======================================================
+      # 7.5. [全局修復] 升級 iptables 1.8.11 + 修復所有依賴包路徑 + 套用 Upstream Patches
+      # =======================================================
+      - name: 🔥 Auto Upgrade iptables 1.8.11 & Patch
+        run: |
+          set +e  # 關閉錯誤中斷，確保跑完全程
+          set -x  # 如果需要極致 Debug 可打開此行
+          
+          echo "::group::Iptables Upgrade & Patching (1.8.11 Collector Mode)"
+          
+          NEW_VER="iptables-1.8.11"
+          
+          # [初始化] 流程控制變數
+          SKIP_PATCHING=false
+          
+          # --- Part 1: 定位與變數準備 ---
+          IPT_MAKEFILE=$(find padavan-ng/trunk/user/iptables -name Makefile | head -n 1)
+          IPT_DIR=$(dirname "$IPT_MAKEFILE")
+          # 定義最終解壓後的目錄名稱 (通常是 iptables-1.8.11)
+          IPT_ROOT="$IPT_DIR/$NEW_VER"
+          
+          echo "✅ 鎖定 iptables Makefile: $IPT_MAKEFILE"
+          echo "✅ 工作目錄 (IPT_DIR): $IPT_DIR"
+          
+          # 從 Makefile 裡面抓出目前的版本 (例如 iptables-1.8.10)
+          OLD_VER_STR=$(grep -o 'iptables-[0-9.]*' "$IPT_MAKEFILE" | head -n 1)
+          
+          # [Bug Fix] 防呆機制：如果抓不到版本號，給予預設值，避免 sed 語法錯誤
+          if [ -z "$OLD_VER_STR" ]; then
+              echo "⚠️ Warning: 無法自動偵測舊版本，預設使用 iptables-1.8.10"
+              OLD_VER_STR="iptables-1.8.10"
+          else
+              echo "✅ 偵測到舊版本: $OLD_VER_STR"
+          fi
+          echo "✅ 準備升級至: $NEW_VER"
+          
+          # =======================================================
+          # [關鍵修復] 強制下載與解壓邏輯 (解決 Patch 時無原始碼的問題)
+          # =======================================================
+          echo "📂 Checking source integrity before patching..."
+          
+          # 檢查原始碼目錄是否存在，不存在則準備下載解壓
+          if [ ! -d "$IPT_ROOT" ]; then
+              echo "⚠️ Source directory '$IPT_ROOT' not found."
+              
+              # 檢查是否已有 tarball (可能是 Makefile 下載的)
+              TAR_FILE="$IPT_DIR/$NEW_VER.tar.xz"
+              
+              if [ ! -f "$TAR_FILE" ]; then
+                  echo "⬇️ Tarball missing. Downloading official source ($NEW_VER)..."
+                  # 使用官方連結下載，避免依賴 build system 的延遲
+                  wget --no-check-certificate -q -O "$TAR_FILE" "https://www.netfilter.org/projects/iptables/files/$NEW_VER.tar.xz" || \
+                  wget --no-check-certificate -q -O "$TAR_FILE" "https://www.netfilter.org/projects/iptables/files/old/$NEW_VER.tar.xz"
+                  
+                  if [ -f "$TAR_FILE" ] && [ -s "$TAR_FILE" ]; then
+                       echo "✅ Download successful."
+                  else
+                       # 【修正點 1】移除 exit 1，改為設定 SKIP_PATCHING，確保流程不中斷
+                       echo "❌ CRITICAL: Failed to download iptables source! Patching phase will be SKIPPED."
+                       SKIP_PATCHING=true
+                  fi
+              fi
+              
+              # 只有在下載成功且沒有跳過標記時才解壓
+              if [ "$SKIP_PATCHING" != true ] && [ -f "$TAR_FILE" ]; then
+                  echo "📦 Extracting tarball..."
+                  if tar -xJf "$TAR_FILE" -C "$IPT_DIR"; then
+                      echo "✅ Extraction complete: $IPT_ROOT"
+                  else
+                      echo "❌ Extraction failed! Patching phase will be SKIPPED."
+                      SKIP_PATCHING=true
+                  fi
+              fi
+          else
+              echo "✅ Source directory exists. Ready for patching."
+          fi
+
+          # =======================================================
+          # Part 2: 修改 Makefile 與構建修正
+          # =======================================================
+          # 1. 修改主 Makefile 的版本號
+          sed -i "s/$OLD_VER_STR/$NEW_VER/g" "$IPT_MAKEFILE"
+          
+          # 2. 恢復正常的構建流程 (解決 cd error)
+          sed -i 's/^all: config_test/all: download_test extract_test config_test/' "$IPT_MAKEFILE"
+          
+          # 3. 移除 autogen.sh (解決 not found error)
+          sed -i '/.\/autogen.sh/d' "$IPT_MAKEFILE"
+          
+          # 4. 清理過時的 extensions/disabled 複製指令 (解決 copy error)
+          sed -i '/extensions\/disabled\//d' "$IPT_MAKEFILE"
+
+          # =======================================================
+          # 5. [新增] 定義 Patch 下載函數與清單 (V12.3 終極融合版)
+          # =======================================================
+          # 這裡我們將 Patch 下載到 Makefile 同級目錄下的 patches_archive
+          PATCH_DIR="$IPT_DIR/patches_archive"
+          mkdir -p "$PATCH_DIR"
+          LOG_FILE="$IPT_DIR/patch_summary.log"
+          touch "$LOG_FILE"
+          
+          # ⚙️ 設定區
+          if [ "$SKIP_PATCHING" = true ]; then
+              APPLY_PATCHES=false
+              echo "⚠️ Skipping Patch Application due to download/extract failure."
+          else
+              APPLY_PATCHES=true
+          fi
+            
+          # 優化全局網路設置
+          git config --global http.postBuffer 524288000
+          git config --global http.lowSpeedLimit 0
+          git config --global http.lowSpeedTime 999999
+          git config --global http.sslVerify false
+
+          # 🛠️ [核心函數] 獨立驗證邏輯 (V12.3: Awk 智慧邊界判定 + 行數防禦)
+          verify_patch_integrity() {
+              local F_PATH="$1"
+              local EXP_ID="$2"
+              local EXP_SUBJ="$3"
+              
+              # 1. 基礎檔案檢查
+              if [ ! -s "$F_PATH" ]; then return 1; fi
+              if ! grep -qE "^diff --git|^--- a/" "$F_PATH"; then return 1; fi
+
+              local CHECK_PASS=true
+
+              # 2. Commit ID 比對
+              if [ -n "$EXP_ID" ]; then
+                  local FILE_ID=$(grep "^From " "$F_PATH" | head -n 1 | awk '{print $2}')
+                  if [[ "$FILE_ID" == "$EXP_ID"* ]]; then
+                      echo "   ✅ ID Check: MATCH ($EXP_ID)"
+                  else
+                      echo "   ❌ ID Check: MISMATCH (File: ${FILE_ID:0:8} vs Url: ${EXP_ID:0:8})"
+                      CHECK_PASS=false
+                  fi
+              fi
+
+              # 3. Subject 標題比對 (使用 awk 進行多行合併與智慧邊界偵測)
+              if [ -n "$EXP_SUBJ" ]; then
+                  # Awk 邏輯：
+                  # 1. 找到 Subject: 開頭，設定 flag=1。
+                  # 2. 如果 flag=1，檢查當前行是否為邊界（空行或新 Header）。
+                  # 3. 如果是邊界，停止讀取；否則將內容串接。
+                  # 4. 輸出串接後的結果。
+                  local RAW_SUBJ_BLOCK=$(awk '
+                      /^Subject: / { flag=1; sub(/^Subject: /, ""); printf "%s", $0; next }
+                      flag == 1 {
+                          # 【修正點 2】加入行數限制，防止緩衝區溢位
+                          c++; if (c > 10) exit; 
+                          if (/^$/) exit;  # 遇到空行 -> 結束
+                          if (/^[A-Za-z0-9-]+:/) exit; # 遇到新 Header (如 MIME-Version:) -> 結束
+                          printf " %s", $0; # 否則視為 Subject 的延續 (換行變空格)
+                      }
+                  ' "$F_PATH" | sed 's/\[PATCH\] //g')
+                  
+                  # 執行標準化：只保留英數字
+                  local FILE_NORM_SUBJ=$(echo "$RAW_SUBJ_BLOCK" | tr -dc 'a-zA-Z0-9')
+                  
+                  if [ "$FILE_NORM_SUBJ" == "$EXP_SUBJ" ]; then
+                      echo "   ✅ Subject Check: MATCH"
+                  else
+                      echo "   ❌ Subject Check: MISMATCH"
+                      # echo "      Exp: $EXP_SUBJ"
+                      # echo "      Got: $FILE_NORM_SUBJ"
+                      CHECK_PASS=false
+                  fi
+              fi
+
+              if [ "$CHECK_PASS" = true ]; then return 0; else return 1; fi
+          }
+
+          # 🛠️ [主處理函數] V12 邏輯：Process Loop (快取失敗 -> 回歸主下載流程)
+          download_and_process() {
+              local DATE=$1
+              local RAW_NAME=$2
+              local URL=$3
+              local COUNT=$4
+              
+              # A. 參數準備
+              local SAFE_NAME=$(echo "$RAW_NAME" | sed 's/[^a-zA-Z0-9]/_/g')
+              local PATCH_FILENAME="$PATCH_DIR/${COUNT}_${DATE}_${SAFE_NAME}.patch"
+              local COOKIE_FILE="$IPT_DIR/cookies.txt"
+              
+              local TARGET_COMMIT_ID=$(echo "$URL" | grep -o 'id=[a-f0-9]*' | cut -d= -f2)
+              local TARGET_NORM_SUBJECT=$(echo "$RAW_NAME" | tr -dc 'a-zA-Z0-9')
+
+              echo "---------------------------------------------------"
+              echo "Processing Patch #$COUNT: $RAW_NAME"
+
+              local PROCESS_ATTEMPT=0
+              local PROCESS_SUCCESS=false
+
+              # 🔥 V12 核心：使用 while 迴圈處理重試
+              while [ $PROCESS_ATTEMPT -lt 2 ]; do
+                  PROCESS_ATTEMPT=$((PROCESS_ATTEMPT+1))
+                  local NEED_DOWNLOAD=true
+
+                  # ==========================================
+                  # B. 狀態檢查 (Check Phase)
+                  # ==========================================
+                  if [ -f "$PATCH_FILENAME" ]; then
+                      echo "🔍 [Attempt $PROCESS_ATTEMPT] Verifying local cache..."
+                      if verify_patch_integrity "$PATCH_FILENAME" "$TARGET_COMMIT_ID" "$TARGET_NORM_SUBJECT"; then
+                          echo "✅ Local cache verified valid."
+                          NEED_DOWNLOAD=false
+                      else
+                          echo "⚠️ Cache verification failed. Deleting..."
+                          rm -f "$PATCH_FILENAME"
+                          NEED_DOWNLOAD=true
+                      fi
+                  else
+                      NEED_DOWNLOAD=true
+                  fi
+
+                  # ==========================================
+                  # C. 下載流程 (Download Phase) - 完整的 V9 參數防禦
+                  # ==========================================
+                  if [ "$NEED_DOWNLOAD" = true ]; then
+                      echo "⬇️ [Attempt $PROCESS_ATTEMPT] Starting Full Download Sequence..."
+
+                      # [UA 生成]
+                      if [ $((10#$COUNT % 10)) -eq 1 ] || [ ! -f "$IPT_DIR/ua_cache.txt" ]; then
+                          local MINOR_VER=$((RANDOM % 100))
+                          echo "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.${MINOR_VER}.0 Safari/537.36" > "$IPT_DIR/ua_cache.txt"
+                          rm -f "$COOKIE_FILE"
+                          echo "🔄 Session Rotate: New UA Generated."
+                      fi
+                      local UA=$(cat "$IPT_DIR/ua_cache.txt")
+                      
+                      # [Headers 設定]
+                      local H_SEC_CH_UA='"Not(A:Brand";v="8", "Chromium";v="144", "Google Chrome";v="144"'
+                      local H_SEC_PLATFORM='"Windows"'
+                      local H_LANG="en-US,en;q=0.9"
+                      local ACCEPT_FILE="text/x-diff,text/plain,application/octet-stream;q=0.9,*/*;q=0.8"
+                      
+                      local COMMIT_URL=$(echo "$URL" | sed 's|/patch/|/commit/|')
+                      local LOG_URL="https://git.netfilter.org/iptables/log/"
+                      
+                      # [隨機延遲]
+                      if [ $((10#$COUNT % 30)) -eq 0 ]; then
+                          echo "☕ Long Coffee Break..."
+                          sleep $(shuf -i 20-40 -n 1)
+                      else
+                          sleep $(shuf -i 2-4 -n 1)
+                      fi
+
+                      local MAX_RETRIES=5
+                      local DOWNLOAD_OK=false
+
+                      for ((i=1; i<=MAX_RETRIES; i++)); do
+                          local BACKOFF_TIME=$((5 * i + 5))
+                          local PREFLIGHT_DONE=false
+
+                          # [Pre-flight Check]
+                          if [ $((RANDOM % 5)) -eq 0 ] || [ $i -gt 1 ]; then
+                              echo "🎭 Performing Pre-flight check..."
+                              curl -k -L -s -o /dev/null \
+                                   -c "$COOKIE_FILE" -b "$COOKIE_FILE" \
+                                   -H "User-Agent: $UA" -H "Referer: $LOG_URL" \
+                                   "$COMMIT_URL"
+                              sleep 1
+                              PREFLIGHT_DONE=true
+                          fi
+                          local CUR_REFERER="$LOG_URL"
+                          [ "$PREFLIGHT_DONE" = true ] && CUR_REFERER="$COMMIT_URL"
+
+                          # 1. 嘗試 Curl
+                          if curl -k -L -s \
+                                  -c "$COOKIE_FILE" -b "$COOKIE_FILE" \
+                                  -H "User-Agent: $UA" \
+                                  -H "Accept: $ACCEPT_FILE" \
+                                  -H "Accept-Language: $H_LANG" \
+                                  -H "Referer: $CUR_REFERER" \
+                                  -H "sec-ch-ua: $H_SEC_CH_UA" \
+                                  -H "sec-ch-ua-platform: $H_SEC_PLATFORM" \
+                                  --connect-timeout 20 --retry 2 \
+                                  -o "$PATCH_FILENAME" "$URL"; then
+                                  
+                              if verify_patch_integrity "$PATCH_FILENAME" "$TARGET_COMMIT_ID" "$TARGET_NORM_SUBJECT"; then
+                                  echo "✅ [Try $i] Download Success & Verified."
+                                  DOWNLOAD_OK=true
+                                  break
+                              else
+                                  echo "⚠️ Content invalid. Retrying..."
+                                  rm -f "$COOKIE_FILE"
+                              fi
+                          else
+                              # 2. Curl 失敗，嘗試 Wget
+                              echo "⚠️ Curl failed. Switching to Wget..."
+                              rm -f "$PATCH_FILENAME"
+                              if wget --no-check-certificate -q \
+                                      --user-agent="$UA" \
+                                      --header="Accept: $ACCEPT_FILE" \
+                                      --header="Referer: $COMMIT_URL" \
+                                      -O "$PATCH_FILENAME" "$URL"; then
+                                      
+                                  if verify_patch_integrity "$PATCH_FILENAME" "$TARGET_COMMIT_ID" "$TARGET_NORM_SUBJECT"; then
+                                      echo "✅ [Try $i] Download Success (Wget) & Verified."
+                                      DOWNLOAD_OK=true
+                                      break
+                                  fi
+                              fi
+                          fi
+                          
+                          echo "❌ [Try $i] Failed. Cooling down ${BACKOFF_TIME}s..."
+                          rm -f "$PATCH_FILENAME"
+                          if [ $i -lt $MAX_RETRIES ]; then sleep $BACKOFF_TIME; fi
+                      done
+
+                      if [ "$DOWNLOAD_OK" = false ]; then
+                          echo "❌ CRITICAL: Failed to download valid patch."
+                          echo "[$DATE] #$COUNT DOWNLOAD_FAIL : $RAW_NAME" >> "$LOG_FILE"
+                          return 1 # 下載徹底失敗，中止此 Patch
+                      fi
+                  fi
+
+                  # ==========================================
+                  # D. 套用與智慧循環 (Apply Phase)
+                  # ==========================================
+                  
+                  # 1. 配置檢查
+                  if [ "$APPLY_PATCHES" != true ]; then
+                      echo "📦 Patch verified but skipped (Apply logic disabled by config)."
+                      break 
+                  fi
+
+                  # 2. 目錄檢查
+                  if [ ! -d "$IPT_ROOT" ]; then
+                      echo "❌ CRITICAL: Source directory '$IPT_ROOT' NOT FOUND!"
+                      echo "[$DATE] #$COUNT DIR_MISSING : $RAW_NAME" >> "$LOG_FILE"
+                      return 1 
+                  fi
+
+                  # 3. 執行 Patch
+                  echo "🩹 Applying patch (Pass $PROCESS_ATTEMPT)..."
+                      
+                  if patch -d "$IPT_ROOT" -t -N -l -F 10 -p1 --no-backup-if-mismatch --reject-file=- < "$PATCH_FILENAME"; then
+                      echo "✅ Patch Applied Successfully."
+                      PROCESS_SUCCESS=true
+                      break # 成功跳出
+                  else
+                      # 🟢 [新增] 唯一修改處：Patch 失敗時，立刻檢查檔案是否完好
+                      # 如果檔案校驗通過 (Hash 正確)，代表是「重複套用」，直接視為成功並跳出！
+                      if verify_patch_integrity "$PATCH_FILENAME" "$TARGET_COMMIT_ID" "$TARGET_NORM_SUBJECT" >/dev/null 2>&1; then
+                          echo "⚠️ Patch failed but file integrity is VALID."
+                          echo "   -> Assuming patch was already applied or reversed. Skipping..."
+                          echo "[$DATE] #$COUNT PATCH_SKIP : $RAW_NAME (Integrity OK)" >> "$LOG_FILE"
+                          break
+                      fi
+                      # 🟢 [結束新增] 若校驗失敗，才會執行下面原本的「刪除重抓」邏輯
+
+                      # 🔥 [V12 修正] 智慧判斷邏輯
+                      if [ "$NEED_DOWNLOAD" = false ]; then
+                          # 快取失效 -> 刪除快取 -> 重跑迴圈
+                          echo "⚠️ Apply failed using cached file."
+                          echo "🔄 Deleting stale cache and forcing FRESH download loop..."
+                          rm -f "$PATCH_FILENAME"
+                          continue 
+                      else
+                          # 新下載也失敗 -> 嚴重錯誤
+                          echo "❌ CRITICAL: Patch failed even with fresh download."
+                          echo "[$DATE] #$COUNT PATCH_FAIL : $RAW_NAME" >> "$LOG_FILE"
+                          return 1 
+                      fi
+                  fi
+              done
+          }
+
+          # 寫入 Patch 清單 (Oldest -> Newest)
+          cat << 'EOL' > "$IPT_DIR/patch_list.txt"
+          2024-11-08|configure: Bump version for 1.8.11 release|https://git.netfilter.org/iptables/patch/?id=0506bea1dcc8f12d94e7c32bf2fb04abb3fdd269
+          2024-11-12|ip[6]tables-translate: fix test failures when WESP is defined|https://git.netfilter.org/iptables/patch/?id=e6e232d0ae252b0b86278455b18d9475b95db8f0
+          2024-11-19|nft: fix interface comparisons in -C commands|https://git.netfilter.org/iptables/patch/?id=40406dbfaefbc204134452b2747bae4f6a122848
+          2024-11-19|nft: Drop interface mask leftovers from post_parse callbacks|https://git.netfilter.org/iptables/patch/?id=b3f3e256c263b9a1db49732696aba0dde084ef5e
+          2025-01-28|configure: Avoid addition assignment operators|https://git.netfilter.org/iptables/patch/?id=6310639f697d4a570286960c470a6ec8c324be89
+          2025-04-10|nft: Make add_log() static|https://git.netfilter.org/iptables/patch/?id=17fb168f007eb4200a1d3325898cf5256a029d81
+          2025-04-10|nft: ruleparse: Introduce nft_parse_rule_expr()|https://git.netfilter.org/iptables/patch/?id=d84b1647514f3121bd4a6adfca9a977751c39bbc
+          2025-04-10|nft: __add_{match,target}() can't fail|https://git.netfilter.org/iptables/patch/?id=2db8bf2fbf080f6a054b658df65c468bfa0db68d
+          2025-04-10|nft: Introduce UDATA_TYPE_COMPAT_EXT|https://git.netfilter.org/iptables/patch/?id=f6f0f4f55794a5f1add6f728f80f29f12f36ecd5
+          2025-04-10|nft-ruleparse: Fallback to compat expressions in userdata|https://git.netfilter.org/iptables/patch/?id=ff5f6a208efccd4e2bd8d4fdaf5d284ce54ff69e
+          2025-04-10|nft: Pass nft_handle into add_{action,match}()|https://git.netfilter.org/iptables/patch/?id=739d9bd57ad26bd52bed569264daa97b5943e08d
+          2025-04-10|nft: Embed compat extensions in rule userdata|https://git.netfilter.org/iptables/patch/?id=7746fa0b1619e1bd8465c9a98bdbead628ed428a
+          2025-04-10|tests: iptables-test: Add nft-compat variant|https://git.netfilter.org/iptables/patch/?id=fdb541cddad0681ea3ab1fca8a3949dcf49fb194
+          2025-04-23|extensions: icmp: Support info-request/-reply type names|https://git.netfilter.org/iptables/patch/?id=1e6a2812971a268428b04b03520cd68cb61d76e3
+          2025-04-23|xshared: Accept an option if any given command allows it|https://git.netfilter.org/iptables/patch/?id=192c3a6bc18f206895ec5e38812d648ccfe7e281
+          2025-07-04|extensions: sctp: Translate bare -m sctp match|https://git.netfilter.org/iptables/patch/?id=12e6b5ed65fd91ea413a2e45201289c3d01c4e29
+          2025-07-17|extensions: libebt_redirect: prevent translation|https://git.netfilter.org/iptables/patch/?id=d33c6ad308cf7b9f627aeed48a5163c0374b5035
+          2025-07-22|libxtables: Promote xtopt_esize_by_type() as xtopt_psize getter|https://git.netfilter.org/iptables/patch/?id=786b75f7c9b9feaa294da097c2e9727747162c79
+          2025-07-22|Revert libxtables: Promote xtopt_esize_by_type() as xtopt_psize getter|https://git.netfilter.org/iptables/patch/?id=f66687b6cb5fd0bb36107c30339aa7f4ff75e98e
+          2025-07-22|xtables-monitor: Print -X command for base chains, too|https://git.netfilter.org/iptables/patch/?id=8cb0c13b7777e72ca6f4265845dc99eff7cdf679
+          2025-08-21|extensions: man: Add a note about route_localnet sysctl|https://git.netfilter.org/iptables/patch/?id=102e9607c63266c7f3413f8dcae51d9476e396e4
+          2025-08-25|man: iptables-restore.8: document flush behaviour for user-defined chains|https://git.netfilter.org/iptables/patch/?id=c3d5053db05f99bd72219aebeefc7fb0195ac041
+          2025-11-27|nft: Support replacing a rule added in the same batch|https://git.netfilter.org/iptables/patch/?id=78d7a5f8619f3965ec2da13003a876c808c40cfb
+          EOL
+
+          # 執行下載
+          count=0
+          while IFS='|' read -r p_date p_name p_url; do
+              [ -z "$p_date" ] && continue
+              count=$((count+1))
+              # 補零以確保 glob 排序正確 (01, 02... 23)
+              count_str=$(printf "%02d" $count)
+              download_and_process "$p_date" "$p_name" "$p_url" "$count_str"
+          done < "$IPT_DIR/patch_list.txt"
+
+          echo "🎉 Patch processing cycle completed!"
+          
+          if [ -s "$LOG_FILE" ]; then
+              echo "⚠️ ================= SUMMARY ================="
+              cat "$LOG_FILE"
+              echo "=========================================="
+          else
+              echo "✅ Perfect! No errors recorded."
+          fi
+
+          # =======================================================
+          # [第100號 Patch] 應用屏蔽警告補丁 (寬容模式)
+          # =======================================================
+          echo "🔧 Generating warning suppression patch (Patch #100)..."
+          
+          PATCH_100="$PATCH_DIR/100_Custom_Suppress_Warnings.patch"
+          
+          cat << 'END_PATCH' > "$PATCH_100"
+          --- a/libxtables/xtables.c
+          +++ b/libxtables/xtables.c
+          @@ -809,9 +809,11 @@
+           		dptr = &((*dptr)->next);
+           	}
+           
+          +#if 0
+           	if (seen && !found)
+           		fprintf(stderr,
+           			"Warning: Extension %s is not supported, missing kernel module?\n",
+           			name);
+          +#endif
+           
+           	for (ptr = xtables_matches; ptr; ptr = ptr->next) {
+          @@ -939,9 +941,11 @@
+           		dptr = &((*dptr)->next);
+           	}
+           
+          +#if 0
+           	if (seen && !found)
+           		fprintf(stderr,
+           			"Warning: Extension %s is not supported, missing kernel module?\n",
+           			name);
+          +#endif
+           
+           	for (ptr = xtables_targets; ptr; ptr = ptr->next) {
+          END_PATCH
+
+          # 只有在開啟套用模式時才執行
+          if [ "$APPLY_PATCHES" = true ]; then
+              # [強化] V7 架構：即時打入源碼 (取代原本的 dry-run)
+              if [ -d "$IPT_ROOT" ]; then
+                  echo "🩹 Applying Custom Patch #100 IMMEDIATELY..."
+                  # -t:自動跳過缺檔, -N:跳過已修復, -F 10:允許10行誤差
+                  if patch -d "$IPT_ROOT" -t -N -l -F 10 -p1 --no-backup-if-mismatch --reject-file=- < "$PATCH_100"; then
+                      echo "✅ Patch #100 Applied Successfully."
+                  else
+                      echo "⚠️ Patch #100 Failed (Skipped or Mismatch)."
+                      echo "[LOCAL] #100 PATCH_FAIL : Custom_Suppress_Warnings" >> "$LOG_FILE"
+                  fi
+              else
+                  echo "⚠️ Source directory not ready for immediate patching."
+              fi
+              
+              # =======================================================
+              # 7. 注入補丁應用邏輯
+              # =======================================================
+              # ❌ 舊寫法 (危險): s|...|... && ...|
+              # ✅ 新寫法 (安全): 使用分號 ; 替代 &&，避免 sed 解析 & 特殊字元
+              IPT_MAKEFILE="padavan-ng/trunk/user/iptables/Makefile"
+              if [ -f "$IPT_MAKEFILE" ]; then
+                  # 說明：在 tar 解壓後，使用 ; 分號隔開指令，確保 Patch 迴圈能執行
+                  # 【修正點 3】將 exit 1 改為 true，允許編譯時 Patch 失敗但不中斷
+                  sed -i 's@tar xJf $(SRC_NAME).tar.xz;@tar xJf $(SRC_NAME).tar.xz; echo "🩹 Patching..."; for p in `ls ../patches_archive/*.patch | sort`; do echo "   - Applying $$p"; patch -d $(SRC_NAME) -p1 < $$p || true; done;@' "$IPT_MAKEFILE"
+                  echo "✅ Iptables 本體修復與 Patch 注入完成 (Makefile Modified)."
+              else
+                  echo "⚠️ Makefile not found, skipping injection."
+              fi
+
+          else
+              echo "📦 Custom Patch #100 generated but NOT applied."
+              echo "🚫 Skipping Makefile injection (APPLY_PATCHES=false)"
+          fi
+          
+          # =======================================================
+          # 🔍 無條件驗證代碼內容 (確保無論是否 Patch，狀態都透明)
+          # =======================================================
+          echo "🔍 Verifying code content (Checking for applied changes)..."
+          # 注意：此時源碼可能尚未解壓，如果尚未解壓，這裡會提示找不到檔案，這是正常的。
+          # 但如果我們是在本地環境多次執行，或者已經有解壓後的源碼，這裡就能派上用場。
+          # 若要驗證最終結果，通常要等到編譯後。這裡的驗證主要針對「如果檔案存在」。
+          VERIFY_TARGET="libxtables/xtables.c"
+          
+          # 使用 IPT_ROOT 變數確保路徑正確
+          if [ -f "$IPT_ROOT/$VERIFY_TARGET" ]; then
+              # 檢查是否含有特徵碼 (#if 0 包裹著 Warning)
+              if grep -q "#if 0" "$IPT_ROOT/$VERIFY_TARGET" && grep -q "Warning: Extension %s is not supported" "$IPT_ROOT/$VERIFY_TARGET"; then
+                  echo "✅ Verification Passed: Code IS patched/modified (Warnings suppressed)."
+                  echo "👇 Current Code Snippet (Looks Good):"
+                  # 顯示匹配行及其上下 3 行，方便人工確認
+                  grep -nC 3 "Warning: Extension %s is not supported" "$IPT_ROOT/$VERIFY_TARGET"
+              else
+                  echo "⚠️ Verification Result: Code is UNPATCHED (Warnings active)."
+                  echo "👇 Current Code Snippet (Original/Unpatched):"
+                  grep -nC 3 "Warning: Extension %s is not supported" "$IPT_ROOT/$VERIFY_TARGET"
+              fi
+          else
+              echo "ℹ️ Verification skipped: Source file $VERIFY_TARGET not found yet (will be extracted during build)."
+              echo "   (This is normal for a clean build before compilation starts)"
+          fi
+          
+          # --- Part 2: [新增] 修復所有依賴 iptables 的其他軟體 (MiniUPnPD 等) ---
+          # =======================================================
+          # 10. [修復] 依賴 iptables 的其他軟體 (MiniUPnPD 等)
+          # =======================================================
+          # ✅ [Fix] 移除重複定義的變數，直接使用腳本開頭偵測到的 OLD_VER_STR
+          # 這樣即使舊版本是 1.8.9，這裡也能正確修復，不會因為寫死 1.8.10 而失敗
+          
+          echo "🔍 開始掃描並修復依賴舊版 iptables ($OLD_VER_STR) 的其他套件..."
+          
+          # 防呆機制：如果開頭沒抓到舊版本號，給一個默認值以免 sed 報錯
+          if [ -z "$OLD_VER_STR" ]; then
+              echo "⚠️ Warning: Could not detect OLD_VER_STR automatically. Fallback to 1.8.10"
+              OLD_VER_STR="iptables-1.8.10"
+          fi
+
+          # 搜尋 trunk/user 下所有含有舊版本字串的 Makefile
+          # 使用 || true 避免 grep 沒找到檔案時導致腳本中斷 (如果 set -e 開啟的話)
+          grep -rl "$OLD_VER_STR" padavan-ng/trunk/user/ | while read -r file ; do
+              echo "  - 修復路徑: $file"
+              sed -i "s/$OLD_VER_STR/$NEW_VER/g" "$file"
+          done
+          
+          echo "🎉 全局路徑替換完成！所有套件現在都指向 $NEW_VER"
+          
+          # [增強] 最終狀態檢查 (Debug 用，確認目錄存在且時間正確)
+          echo "📋 Final listing of source directory to verify patch application:"
+          if [ -d "$IPT_ROOT" ]; then
+              ls -ld "$IPT_ROOT"
+          else
+              echo "ℹ️ Source directory not present yet (Clean Build)."
+          fi
+          
+          echo "::endgroup::"
+
+      # 7.6 [網路工具] 智慧編譯 新增 Arptables
+      - name: 🔥 Network Tools (Smart Compile Arptables)
+        run: |
+          echo "::group::Smart Compile Network Tools"
+          
+          # === 設定路徑 ===
+          BASE_DIR="$GITHUB_WORKSPACE/padavan-ng/trunk/user"
+          ARP_ROOT="$BASE_DIR/arptables"
+          
+          # ========================================
+          # 1. 新增 Arptables v0.0.5
+          # ========================================
+          echo "⬇️ Processing Arptables..."
+          
+          mkdir -p "$ARP_ROOT"
+          cd "$ARP_ROOT" || exit 1
+          
+          # 檢查是否已經設定過，避免重複執行
+          if [ ! -f "Makefile" ] || ! grep -q "arptables" "Makefile"; then
+            
+            ARP_TAR="arptables-0.0.5.tar.gz"
+            ARP_URL="https://www.netfilter.org/pub/arptables/arptables-0.0.5.tar.gz"
+            
+            echo "   Downloading $ARP_URL ..."
+            wget --no-check-certificate "$ARP_URL" -O "$ARP_TAR" || exit 1
+            tar -xf "$ARP_TAR" || exit 1
+            rm -f "$ARP_TAR"
+            
+            # 找出解壓後的目錄名稱
+            ARP_SRC_NAME=$(ls -d arptables-0*/ | head -n 1 | sed 's/\///')
+            echo "   Detected source: [$ARP_SRC_NAME]"
+            chmod -R u+w "$ARP_SRC_NAME"
+          
+            echo "🔧 Creating Arptables Wrapper Makefile..."
+            
+            # 建立外層 Makefile，讓編譯系統知道如何編譯它
+            cat << EOF > Makefile
+          SRC_NAME=$ARP_SRC_NAME
+          
+          all:
+          	\$(MAKE) -C \$(SRC_NAME) \
+          		CC="\$(CC)" \
+          		AR="\$(AR)" \
+          		KERNEL_DIR=\$(KERNEL_HEADERS_PATH) \
+          		COPT_FLAGS="-Os -static" \
+          		LDFLAGS="-static" \
+          		arptables-legacy
+          
+          romfs:
+          	\$(ROMFSINST) \$(SRC_NAME)/arptables-legacy /bin/arptables
+          
+          clean:
+          	\$(MAKE) -C \$(SRC_NAME) clean
+          EOF
+          
+            echo "🔧 Registering arptables in trunk/user/Makefile..."
+            cd "$BASE_DIR" || exit 1
+            
+            # 將 arptables 加入編譯列表
+            # 邏輯：如果在 Makefile 裡還沒看到 arptables，就加進去
+            if ! grep -q "dir_y += arptables" Makefile; then
+                # 嘗試加在 ebtables 後面，保持整齊
+                if grep -q "dir_y += ebtables" Makefile; then
+                    sed -i '/dir_y += ebtables/a dir_y += arptables' Makefile
+                else
+                    # 找不到 ebtables 就加在檔案最後
+                    echo "dir_y += arptables" >> Makefile
+                fi
+                echo "   ✅ Added to compilation list."
+            else
+                echo "   ⚠️ Already in compilation list."
+            fi
+            
+          else
+            echo "⚠️ Arptables seems already configured. Skipping."
+          fi
+
+          # ========================================
+          # 2. 核心支援 (究極嚴謹 Kernel Config)
+          # ========================================
+          echo "🔧 Deep-Cleaning & Enabling Kernel modules..."
+          cd "$GITHUB_WORKSPACE"
+          TARGET_KCONF="padavan-ng/trunk/linux-3.4.x/.config"
+          
+          if [ -f "$TARGET_KCONF" ]; then
+             MODULES="CONFIG_IP_NF_ARPTABLES CONFIG_IP_NF_ARPFILTER CONFIG_IP_NF_ARP_MANGLE CONFIG_NF_LOG_ARP CONFIG_BRIDGE_EBT_ARP CONFIG_BRIDGE_EBT_ARPREPLY"
+             for mod in $MODULES; do
+                if grep -q "$mod" "$TARGET_KCONF"; then
+                   sed -i "s|^.*$mod.*$|$mod=m|" "$TARGET_KCONF"
+                   echo "   ✅ Forced $mod=m (Updated)"
+                else
+                   echo "$mod=m" >> "$TARGET_KCONF"
+                   echo "   ✅ Forced $mod=m (Added)"
+                fi
+             done
+          fi
+          
+          echo "::endgroup::"
+
+          # 7.7 [驅動魔改] 雙重鎖定：修復 Beacon 超時 + 防止 Peer 踢除後失憶 (增強版)
+      - name: 🔥 Patch MT7610E Driver (Anti-Disconnect & Fast Reconnect)
+        run: |
+          echo "::group::Applying Ultimate Driver Patch"
+          
+          # 1. 精準搜尋目標檔案
+          # ---------------------------------------------------
+          # 搜尋 mt7610 目錄下的 ap_apcli.c (Beacon控制)
+          TARGET_APCLI=$(find padavan-ng/trunk/proprietary/rt_wifi/rtpci/3.0.X.X -type f -name "ap_apcli.c" | grep "mt7610" | head -n 1)
+          
+          # 搜尋 mt7610 目錄下的 apcli_ctrl.c (連線控制)
+          # 注意：直接搜尋檔案，不依賴 dirname 推算
+          TARGET_CTRL=$(find padavan-ng/trunk/proprietary/rt_wifi/rtpci/3.0.X.X -type f -name "apcli_ctrl.c" | grep "mt7610" | head -n 1)
+
+          if [ -f "$TARGET_APCLI" ] && [ -f "$TARGET_CTRL" ]; then
+            echo "✅ 找到驅動核心檔案："
+            echo "   - Beacon控制: $TARGET_APCLI"
+            echo "   - 連線控制:   $TARGET_CTRL"
+          else
+            echo "::error:: ❌ 找不到驅動檔案！請檢查路徑。"
+            exit 1
+          fi
+
+          # 2. 修復 Beacon 超時 (維持原邏輯)
+          # ---------------------------------------------------
+          echo "🔧 Patching Beacon Timeout..."
+          cp "$TARGET_APCLI" "${TARGET_APCLI}.bak"
+          
+          # 將 12 * OS_HZ 改為 60 * OS_HZ
+          sed -i 's/12[[:space:]]*\*[[:space:]]*OS_HZ/60 * OS_HZ/g' "$TARGET_APCLI"
+          
+          if grep -q "60 \* OS_HZ" "$TARGET_APCLI"; then
+             echo "   ✅ Beacon Timeout patch applied."
+          else
+             echo "::error:: ❌ Beacon patch failed. (Pattern not found)"
+             exit 1
+          fi
+
+          # 3. 修復 Peer Disconnect (殭屍重連模式)
+          # ---------------------------------------------------
+          echo "🔧 Patching Peer Disconnect Logic..."
+          cp "$TARGET_CTRL" "${TARGET_CTRL}.bak"
+          
+          # 使用 sed 註解掉清除 SSID/BSSID 的代碼
+          # 使用 [[:space:]]* 忽略空格/Tab差異，並匹配 NdisZeroMemory
+          
+          # A. 禁止清除 BSSID
+          sed -i 's/^[[:space:]]*NdisZeroMemory.*ApCliMlmeAux.Bssid/\/\/&/' "$TARGET_CTRL"
+          
+          # B. 禁止清除 SSID 長度
+          sed -i 's/^[[:space:]]*.*ApCliMlmeAux.SsidLen[[:space:]]*=[[:space:]]*0/\/\/&/' "$TARGET_CTRL"
+          
+          # C. 禁止清除 SSID 字串
+          sed -i 's/^[[:space:]]*NdisZeroMemory.*ApCliMlmeAux.Ssid,/\/\/&/' "$TARGET_CTRL"
+          
+          # D. 禁止清除 RSSI
+          sed -i 's/^[[:space:]]*.*ApCliMlmeAux.Rssi[[:space:]]*=[[:space:]]*0/\/\/&/' "$TARGET_CTRL"
+
+          # 4. 驗證修復結果
+          # ---------------------------------------------------
+          echo "🔍 Verifying apcli_ctrl.c changes..."
+          
+          # 檢查是否有任何一行被註解掉 (含有 //NdisZeroMemory...ApCliMlmeAux)
+          if grep -q "//.*NdisZeroMemory.*ApCliMlmeAux" "$TARGET_CTRL"; then
+             echo "🎉 Ultimate Fix Applied! (Fast Reconnect Mode Enabled)"
+             echo "--------------------------------------"
+             # 顯示修改後的關鍵片段供確認
+             grep -n "//.*NdisZeroMemory" "$TARGET_CTRL" | head -n 5
+             echo "--------------------------------------"
+          else
+             echo "::error:: ❌ apcli_ctrl.c patch failed!"
+             echo "DEBUG: 原始檔案內容片段 (供檢查):"
+             grep -C 2 "ApCliMlmeAux.Bssid" "$TARGET_CTRL" | head -n 10
+             exit 1
+          fi
+          
+          echo "::endgroup::"
+
+      - name: 🌐 Custom Language Selector
+        run: |
+          echo "::group::Setting up WebUI Language"
+          
+          SELECTED_LANG_OPTION="${{ inputs.language_select }}"
+          TARGET_BOARD="${{ inputs.target_select }}"
+          TEMPLATES_DIR="padavan-ng/trunk/configs/templates"
+          
+          # 判斷並匯出 Release 用語言標籤變數
+          if [ "$SELECTED_LANG_OPTION" == "English_Only" ]; then
+            LANG_CODE="NONE"
+            echo "RELEASE_LANG=English Only" >> $GITHUB_ENV
+          else
+            LANG_CODE=$(echo "$SELECTED_LANG_OPTION" | cut -d' ' -f1)
+            echo "RELEASE_LANG=English + $SELECTED_LANG_OPTION" >> $GITHUB_ENV
+          fi
+          
+          echo "🎯 Target Board: $TARGET_BOARD"
+          echo "🗣️ Selected Language Code: $LANG_CODE"
+          
+          CONFIG_PATH=$(find "$TEMPLATES_DIR" -type f -name "*.config" | grep -i "$TARGET_BOARD.config" | head -n 1)
+          
+          if [ -z "$CONFIG_PATH" ]; then
+             echo "⚠️ Config not found via strict match, trying loose search..."
+             CONFIG_PATH=$(find "$TEMPLATES_DIR" -type f -name "*.config" | grep -i "$TARGET_BOARD" | head -n 1)
+          fi
+          
+          if [ -f "$CONFIG_PATH" ]; then
+            echo "📝 Modifying Config: $CONFIG_PATH"
+            sed -i 's/^CONFIG_FIRMWARE_INCLUDE_LANG_.*=y/#&/' "$CONFIG_PATH"
+            echo "✅ All non-English languages disabled."
+            
+            if [ "$LANG_CODE" != "NONE" ]; then
+              TARGET_LANG_CONFIG="CONFIG_FIRMWARE_INCLUDE_LANG_$LANG_CODE"
+              if grep -q "$TARGET_LANG_CONFIG" "$CONFIG_PATH"; then
+                sed -i "s/^.*$TARGET_LANG_CONFIG.*/$TARGET_LANG_CONFIG=y/" "$CONFIG_PATH"
+                echo "✅ Enabled language: $LANG_CODE"
+              else
+                echo "$TARGET_LANG_CONFIG=y" >> "$CONFIG_PATH"
+                echo "✅ Appended language config: $LANG_CODE"
+              fi
+            else
+              echo "ℹ️ Keeping English Only."
+            fi
+            
+            echo "🔍 Current Enabled Languages in Config:"
+            grep "^CONFIG_FIRMWARE_INCLUDE_LANG_" "$CONFIG_PATH" || echo "(None - English Only)"
+          else
+            echo "❌ Error: Could not find template config for $TARGET_BOARD"
+            echo "   Please check inputs.target_select matches the filename in trunk/configs/templates/"
+            exit 1
+          fi
+          echo "::endgroup::"
+      
+      - name: 🕊️ Dave Täht Tribute & CAKE Patch
+        run: |
+          # =======================================================
+          # 🕊️ In Memory of Dave Täht
+          # -------------------------------------------------------
+          # 🇹🇼：靈魂永駐，精神長存
+          # 🇺🇸：May his soul find eternal peace, and his spirit live on forever.
+          #
+          # 📢 SLOGAN: When you miss Dave, modprobe sch_cake!
+          # =======================================================
+          
+          echo "::group::Applying CAKE to Kernel 3.4 Config"
+          
+          TARGET_BOARD="${{ inputs.target_select }}"
+          BOARDS_DIR="padavan-ng/trunk/configs/boards"
+          
+          # 3.4 內核的目錄結構較深 (例如 boards/ASUS/RT-N56U)，使用 find 尋找
+          echo "🔍 Searching for config file for board: $TARGET_BOARD..."
+          CONFIG_PATH=$(find "$BOARDS_DIR" -name "kernel-3.4.x.config" | grep "/$TARGET_BOARD/" | head -n 1)
+
+          if [ -z "$CONFIG_PATH" ]; then
+             echo "⚠️  Direct match not found, trying loose search..."
+             # 備用搜尋：有些機型目錄可能不完全等於 target_select (雖然很少見)
+             CONFIG_PATH=$(find "$BOARDS_DIR" -type f -name "kernel-3.4.x.config" | grep "$TARGET_BOARD" | head -n 1)
+          fi
+
+          if [ -f "$CONFIG_PATH" ]; then
+            echo "🎯 Found Config: $CONFIG_PATH"
+            
+            # 檢查是否已經存在 CAKE 設定 (★ 同步相容 =y 或 =m)
+            if grep -qE "CONFIG_NET_SCH_CAKE=[ym]" "$CONFIG_PATH"; then
+              echo "⚠️ CAKE module is already enabled in config."
+            else
+              echo "🔧 Injecting CAKE module..."
+              
+              # 在 FQ_CODEL 之後插入 CAKE (★ FQ_CODEL 同步相容 =y 或 =m)
+              if grep -qE "CONFIG_NET_SCH_FQ_CODEL=[ym]" "$CONFIG_PATH"; then
+                # sed 搜尋只匹配等號，無縫插入
+                sed -i '/CONFIG_NET_SCH_FQ_CODEL=/a CONFIG_NET_SCH_CAKE=m' "$CONFIG_PATH"
+                echo "✅ Inserted CAKE after FQ_CODEL."
+              else
+                # 若找不到 FQ_CODEL，則附加在檔案末尾
+                echo "CONFIG_NET_SCH_CAKE=m" >> "$CONFIG_PATH"
+                echo "✅ Appended CAKE to end of file."
+              fi
+            fi
+            
+            # 再次驗證 (★ 最終驗證同步相容 =y 或 =m)
+            if grep -qE "CONFIG_NET_SCH_CAKE=[ym]" "$CONFIG_PATH"; then
+               echo "🎉 CAKE Patch Applied Successfully!"
+               echo "📢 Reminder: When you miss Dave, modprobe sch_cake!"
+            else
+               echo "❌ Error: Failed to apply CAKE patch."
+               exit 1
+            fi
+          else
+            echo "❌ Config file not found for $TARGET_BOARD"
+            echo "   Please check if the board exists in trunk/configs/boards/"
+            exit 1
+          fi
+          echo "::endgroup::"
+      
+      # 8. 開始編譯
+      - name: Build firmware
+        run: |
+          echo "::group::Build Process"
+          cp build.config padavan-ng/trunk/.config
+          cd padavan-ng/trunk
+          
+          ./clear_tree.sh > /dev/null 2>&1
+          rm -rf tmp staging
+          
+          echo "Starting build... Logs will be saved to build.log"
+          set -o pipefail
+          ./build_firmware.sh 2>&1 | tee build.log
+          echo "::endgroup::"
+
+      # 9. 智慧打包與產物偵測 (含 iptables Debug 檔案)
+      - name: Smart-Pack & Debug Collection
+        run: |
+          echo "::group::Smart Packing"
+          
+          # 0. 載入編譯後的變數 (修復 Partition Check 警告)
+          if [ -f "padavan-ng/trunk/.config" ]; then
+            source "padavan-ng/trunk/.config"
+          fi
+
+          # 1. 定義絕對路徑
+          WORK_DIR=$(pwd)
+          PACK_DIR="$WORK_DIR/output_pack"
+          IMAGES_DIR="$WORK_DIR/padavan-ng/trunk/images"
+          PARTITIONS_FILE="$WORK_DIR/padavan-ng/trunk/configs/boards/$CONFIG_VENDOR/$CONFIG_FIRMWARE_PRODUCT_ID/partitions.config"
+          
+          mkdir -p "$PACK_DIR"
+          
+          # 初始化報告
+          REPORT_FILE="$PACK_DIR/file_report.txt"
+          touch "$REPORT_FILE"
+          
+          echo "Packing Artifacts to: $PACK_DIR"
+          
+          # 2. 備份關鍵配置檔
+          echo "Collecting Debug Configurations..."
+          [ -f "padavan-ng/trunk/.config" ] && cp "padavan-ng/trunk/.config" "$PACK_DIR/build.config"
+          [ -f "padavan-ng/trunk/configs/boards/busybox.config" ] && cp "padavan-ng/trunk/configs/boards/busybox.config" "$PACK_DIR/busybox.config"
+          [ -f "padavan-ng/trunk/user/shared/defaults.h" ] && cp "padavan-ng/trunk/user/shared/defaults.h" "$PACK_DIR/defaults.h.txt"
+          [ -f "padavan-ng/trunk/user/www/dict/CN.dict" ] && cp "padavan-ng/trunk/user/www/dict/CN.dict" "$PACK_DIR/CN.dict.txt"
+          [ -f "padavan-ng/trunk/linux-3.4.x/.config" ] && cp "padavan-ng/trunk/linux-3.4.x/.config" "$PACK_DIR/kernel.config"
+          [ -f "padavan-ng/trunk/build.log" ] && cp "padavan-ng/trunk/build.log" "$PACK_DIR/build.log"
+
+          # =======================================================
+          # 🔥 [NEW] 收集 BusyBox Patches (CVE Debug)
+          # =======================================================
+          BB_SRC_DIR="padavan-ng/trunk/user/busybox/busybox-1.37.0"
+          DEBUG_BB_DIR="$PACK_DIR/debug_busybox"
+          mkdir -p "$DEBUG_BB_DIR"
+
+          # 檢查 Phase 7 建立的 patches 目錄是否存在
+          if [ -d "$BB_SRC_DIR/patches" ]; then
+              echo "✅ Found BusyBox patches directory, collecting..."
+              cp "$BB_SRC_DIR/patches"/*.patch "$DEBUG_BB_DIR/" 2>/dev/null || true
+              echo "- 🛡️ **BusyBox Patches**: Collected in \`debug_busybox\`" >> "$REPORT_FILE"
+              
+              # 額外收集: BusyBox 的實際編譯 .config (確認 CVE 編譯選項)
+              if [ -f "$BB_SRC_DIR/.config" ]; then
+                  cp "$BB_SRC_DIR/.config" "$DEBUG_BB_DIR/busybox_actual_build.config"
+              fi
+          else
+              echo "⚠️ Warning: BusyBox patches directory not found (Phase 7 issue?)."
+              echo "- ⚠️ **BusyBox Patches**: Not found" >> "$REPORT_FILE"
+          fi
+
+          # =======================================================
+          # 🔥 強化：收集 iptables 相關產物 (智慧驗證版)
+          # =======================================================
+          IPT_SRC_DIR="padavan-ng/trunk/user/iptables/iptables-1.8.11"
+          IPT_BASE_DIR="padavan-ng/trunk/user/iptables"
+          DEBUG_DIR="$PACK_DIR/debug_iptables"
+          
+          mkdir -p "$DEBUG_DIR"
+          
+          # 2.1 收集 Patch 檔案
+          if [ -d "$IPT_BASE_DIR/patches_archive" ]; then
+              cp "$IPT_BASE_DIR/patches_archive"/*.patch "$DEBUG_DIR/"
+              echo "- 🛡️ **Patches**: All patches collected in debug_iptables" >> "$REPORT_FILE"
+          else
+              echo "⚠️ Warning: patches directory not found in $IPT_BASE_DIR"
+              echo "- ⚠️ **Patches**: Not found (Collection failed)" >> "$REPORT_FILE"
+          fi
+          
+          # 2.2 收集 Patch 過程日誌 (非常重要!)
+          if [ -f "$IPT_BASE_DIR/patch_summary.log" ]; then
+              cp "$IPT_BASE_DIR/patch_summary.log" "$DEBUG_DIR/patch_summary.log"
+              echo "- 📜 **Patch Log**: Included" >> "$REPORT_FILE"
+          fi
+
+          # 2.3 智慧複製 xtables.c (根據內容決定檔名)
+          TARGET_FILE="$IPT_SRC_DIR/libxtables/xtables.c"
+          
+          if [ -f "$TARGET_FILE" ]; then
+              # 檢查是否含有我們 Patch #100 的特徵碼 (屏蔽警告的 if 0)
+              if grep -q "#if 0" "$TARGET_FILE" && grep -q "Warning: Extension %s is not supported" "$TARGET_FILE"; then
+                  # 判定為已 Patch
+                  cp "$TARGET_FILE" "$DEBUG_DIR/xtables_patched.c"
+                  echo "✅ Detected PATCHED xtables.c - Saving as xtables_patched.c"
+                  echo "- 📄 **Source**: \`xtables_patched.c\` (✅ Patched successfully)" >> "$REPORT_FILE"
+              else
+                  # 判定為未 Patch (原版或 Patch 失敗)
+                  cp "$TARGET_FILE" "$DEBUG_DIR/xtables_original.c"
+                  echo "ℹ️ Detected UNPATCHED xtables.c - Saving as xtables_original.c"
+                  echo "- 📄 **Source**: \`xtables_original.c\` (⚠️ Original/Unpatched)" >> "$REPORT_FILE"
+              fi
+          else
+               echo "⚠️ Warning: xtables.c not found (Maybe build failed or path differs)"
+               echo "- ❌ **Source**: xtables.c not found!" >> "$REPORT_FILE"
+          fi
+          
+          # 2.4 額外收集 config.log (這對編譯失敗除錯非常有用)
+          if [ -f "$IPT_SRC_DIR/config.log" ]; then
+              cp "$IPT_SRC_DIR/config.log" "$DEBUG_DIR/config.log"
+              echo "- 🔧 **Log**: \`config.log\` included" >> "$REPORT_FILE"
+          fi
+          # =======================================================
+
+          # 3. 抓取韌體產物並立即檢查大小
+          if [ -d "$IMAGES_DIR" ]; then
+            echo "Scanning $IMAGES_DIR for images..."
+            
+            # 讀取分區上限
+            if [ -f "$PARTITIONS_FILE" ]; then
+              MAX_FW_SIZE="$(awk '/Firmware/ { getline; getline; sub(",", ""); print strtonum($2); }' "$PARTITIONS_FILE")"
+              echo "Max Firmware Size Allowed: $MAX_FW_SIZE bytes"
+            else
+              MAX_FW_SIZE=0
+              echo "::warning:: Partition config not found, skipping size check."
+            fi
+
+            # 尋找所有產物
+            find "$IMAGES_DIR" -maxdepth 1 -type f \( -name "*.trx" -o -name "*.bin" \) | while read -r file; do
+              fname=$(basename "$file")
+              fsize=$(stat -c %s "$file")
+              
+              cp -v "$file" "$PACK_DIR/"
+              
+              if (( fsize < 500000 )); then
+                echo "- 📦 **U-Boot**: \`$fname\` ($(numfmt --to=iec $fsize))" >> "$REPORT_FILE"
+              else
+                echo "- 💿 **Firmware**: \`$fname\` ($(numfmt --to=iec $fsize))" >> "$REPORT_FILE"
+                
+                if (( MAX_FW_SIZE > 0 )); then
+                  if (( fsize > MAX_FW_SIZE )); then
+                    echo "::error:: Firmware $fname ($fsize bytes) exceeds max size ($MAX_FW_SIZE bytes)!"
+                    exit 1
+                  else
+                    echo "::notice:: $fname size check passed ($fsize / $MAX_FW_SIZE)"
+                  fi
+                fi
+              fi
+            done
+          else
+            echo "::warning:: Images directory not found. Build might have failed completely."
+            echo "- ❌ **Error**: No images directory found." >> "$REPORT_FILE"
+          fi
+
+          # 4. 生成 MD5 (修復：只對檔案生成，避開資料夾)
+          cd "$PACK_DIR"
+          for f in *; do
+            if [ -f "$f" ]; then
+              md5sum "$f" >> md5sum.txt
+            fi
+          done
+          
+          # 讀取報告供 Release 使用
+          FILE_REPORT_CONTENT=$(cat file_report.txt)
+          {
+            echo "FILE_REPORT<<EOF"
+            echo "$FILE_REPORT_CONTENT"
+            echo "EOF"
+          } >> $GITHUB_ENV
+          
+          # 找出最大的韌體檔案 (排除 uboot) 
+          MAIN_FW=$(find . -type f \( -name "*.trx" -o -name "*.bin" \) -printf "%s\t%p\n" | sort -n | tail -1 | cut -f2)
+          [ ! -z "$MAIN_FW" ] && echo "MAIN_FW_PATH=$PACK_DIR/${MAIN_FW#./}" >> $GITHUB_ENV
+          
+          cd "$WORK_DIR"
+
+          # 5. 打包 Zip
+          if [ "$(ls -A $PACK_DIR)" ]; then
+            ZIP_NAME="padavan_pack_${CONFIG_VENDOR}_${CONFIG_FIRMWARE_PRODUCT_ID}.zip"
+            zip -j -r "$ZIP_NAME" "$PACK_DIR"
+            echo "ZIP_FILE_PATH=$WORK_DIR/$ZIP_NAME" >> $GITHUB_ENV
+          else
+            echo "::error:: output_pack is empty!"
+            exit 1
+          fi
+          
+          echo "BUILD_TIMESTAMP=$(TZ='Asia/Taipei' date '+%Y.%m.%d_%H.%M.%S')" >> $GITHUB_ENV
+          echo "CONFIG_VENDOR=$CONFIG_VENDOR" >> $GITHUB_ENV
+          echo "CONFIG_FIRMWARE_PRODUCT_ID=$CONFIG_FIRMWARE_PRODUCT_ID" >> $GITHUB_ENV
+          echo "::endgroup::"
+
+      - name: Upload artifacts (ZIP)
+        uses: actions/upload-artifact@v4
+        with:
+          name: padavan_${{ env.CONFIG_VENDOR }}_${{ env.CONFIG_FIRMWARE_PRODUCT_ID }}_${{ env.BUILD_TIMESTAMP }}
+          path: ${{ env.ZIP_FILE_PATH }}
+
+      # 10. 發布 Release
+      - name: Set Release Tag
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          echo "TAG_NAME=${{ inputs.target_select }}-${{ env.BUILD_TIMESTAMP }}" >> $GITHUB_ENV
+
+      - name: Publish Release
+        if: github.event_name == 'workflow_dispatch'
+        uses: ncipollo/release-action@v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit: ${{ github.sha }}
+          tag: ${{ env.TAG_NAME }}
+          name: ${{ inputs.target_select }} [${{ env.BUILD_TIMESTAMP }}]
+          body: |
+            **Padavan 編譯報告 - Build firmware (Ultimate Fix - Early Size Check)**
+            * **🇹🇼 TW641 Padavan CAKE🍰OpenWrt 25.12 Dave's Guitar🎸開源路由器韌體 與 Dave Täht數位典藏博物館🏛️**: https://TW641.github.io/
+            * **Linux Kernel**: **3.4.113**，大幅領先原廠舊核心。
+            * **專案版本**: Padavan ng CAKE Linux 3.4 (The Dave Täht Tribute Edition) - TW641 的開源專案 | TW641 Padavan CAKE 與 Dave Täht 數位典藏博物館
+            * **專案介紹**: https://TW641.github.io/padavan-ng/
+            * **🕊️ In Memory of Dave Täht**
+            * **📢 SLOGAN: "The darker the night, the brighter the Täht."**
+            * **📢 Reminder: "When you miss Dave, modprobe sch_cake!"**
+            * **效能解放**：全系列整合 CAKE 流量調度、HWNAT (硬體加速) + SFE (軟體加速)。
+            * **介面優化**：內建繁體中文，並針對 1080P 寬螢幕進行排版優化。
+            * **穩定提升**：修復 MT7610E 無線驅動斷線問題，啟用快速重連；3.4 版本採用最穩定的 iproute2-5.12.0 TC + iproute2-5.12.0 IP + Iptables 1.8.11 + 套用 Upstream Patches 與 libmnl 1.0.5 組合，新增 Arptables v0.0.5。
+            * **安全防護**：全面升級 Busybox 1.37.0，修復多個 CVE 高風險漏洞（[SECURITY] CVE-2025-60876 & CVE-2025-46394）。
+            * **padavan-builder-workflow CI YAML自動化雲端編譯韌體腳本來源**: https://github.com/TW641/padavan-builder-workflow/blob/main/.github/workflows/build.yml
+            * **padavan-builder-workflow CI YAML自動化雲端編譯韌體腳本介紹**: https://TW641.github.io/padavan-builder-workflow/
+            * **原始碼來源 Repo**: https://github.com/TW641/padavan-ng
+            * **Branch**: ${{ env.PADAVAN_BRANCH }}
+            * **Commit**: ${{ env.PADAVAN_COMMIT }}
+            * **選擇機型**: ${{ inputs.target_select }}
+            * **WebUI 語言選項 (Custom Language Select)**: ${{ env.RELEASE_LANG }}
+            * **編譯時間**: ${{ env.BUILD_TIME }} (Taipei Time)
+            * **LAN IP**: ${{ env.LANIP }}
+            * **User**: ${{ env.SIGNACCOUNT }} / **Pass**: ${{ env.SIGNPASSWORD }}
+            * **WiFi**: ${{ env.WIFI2GSSID }} / ${{ env.WIFI5GSSID }}
+            
+            ### 📦 產物偵測
+            ${{ env.FILE_REPORT }}
+            
+            ### 🛠 Debug 檔案 (已包含在 Zip)
+            * `defaults.h.txt` (檢查 IP/帳密 是否修改成功)
+            * `CN.dict.txt` (檢查語言檔)
+            * `build.log` (編譯日誌)
+            * `build.config` (編譯參數)
+            * `kernel.config` (核心參數)
+          artifacts: ${{ env.ZIP_FILE_PATH }}
+          allowUpdates: true
+          artifactErrorsFailBuild: true

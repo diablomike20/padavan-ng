@@ -1,11 +1,11 @@
-# 專案基礎設定 (各專案請自行修改此處)
-title: "Padavan ng CAKE Linux 3.4 (The Dave Täht Tribute Edition)"
-description: "A tribute to the soul of bufferbloat mitigation."
-url: "https://tw641.github.io"
+# Project Basic Settings (Please modify this section according to your project requirements)
+title: "Padavan ng CAKE Linux 3.4"
+description: "Padavan-NG"
+url: "https://diablomike20.github.io"
 baseurl: "/padavan-ng"
-github_url: "https://github.com/TW641/padavan-ng"
+github_url: "https://github.com/diablomike20/padavan-ng"
 
-# 強制開啟 GFM 引擎與自動生成 ID (確保 TOC 單頁跳轉完美生效)
+# Force GFM engine to start and automatically generate IDs (to ensure TOC single-page redirection works perfectly)
 markdown: kramdown
 kramdown:
   input: GFM

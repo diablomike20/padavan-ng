@@ -1,6 +1,6 @@
 /* Belkin N750 DB */
 
-#define BOARD_PID		"F9K1103"
+#define BOARD_PID		"BN750DB"
 #define BOARD_NAME		"BL-N750DB"
 #define BOARD_DESC		"Belkin N750 DB Wireless Router"
 #define BOARD_VENDOR_NAME	"Belkin International Inc."

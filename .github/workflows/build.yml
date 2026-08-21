@@ -37,6 +37,7 @@ on:
           # ATEL
           - ALR-U270
           # BELKIN
+          - BN750DB
           - F9K1103
           # DLINK
           - DIR-300B1
@@ -1862,12 +1863,11 @@ jobs:
           fi
           echo "::endgroup::"
       
-      - name: 🕊️ Dave Täht Tribute & CAKE Patch
+      - name: 🕊️ CAKE Patch
         run: |
           # =======================================================
           # 🕊️ In Memory of Dave Täht
           # -------------------------------------------------------
-          # 🇹🇼：靈魂永駐，精神長存
           # 🇺🇸：May his soul find eternal peace, and his spirit live on forever.
           #
           # 📢 SLOGAN: When you miss Dave, modprobe sch_cake!

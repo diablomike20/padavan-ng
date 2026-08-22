@@ -257,12 +257,12 @@ jobs:
             . variables
           fi
           
-          echo "PADAVAN_REPO=https://github.com/TW641/padavan-ng" >> $GITHUB_ENV
+          echo "PADAVAN_REPO=https://github.com/diablomike20/padavan-ng" >> $GITHUB_ENV
           echo "PADAVAN_BRANCH=master" >> $GITHUB_ENV
           echo "PADAVAN_COMMIT=HEAD" >> $GITHUB_ENV
           
           if [ -z "$PADAVAN_THEMES_REPO" ]; then
-            echo "PADAVAN_THEMES_REPO=https://gitlab.com/hadzhioglu/padavan-themes.git" >> $GITHUB_ENV
+            echo "PADAVAN_THEMES_REPO=https://github.com/diablomike20/padavan-themes.git" >> $GITHUB_ENV
             echo "PADAVAN_THEMES_BRANCH=main" >> $GITHUB_ENV
           fi
           
@@ -322,13 +322,12 @@ jobs:
          
             # 3. [語言包精準控制] 
             sed -i "s/CONFIG_FIRMWARE_INCLUDE_LANG_EN=n/CONFIG_FIRMWARE_INCLUDE_LANG_EN=y/g" "$FINAL_CONFIG"
-            sed -i "s/#CONFIG_FIRMWARE_INCLUDE_LANG_CN=y/CONFIG_FIRMWARE_INCLUDE_LANG_CN=y/g" "$FINAL_CONFIG"
             sed -i "s/CONFIG_FIRMWARE_INCLUDE_LANG_CN=n/CONFIG_FIRMWARE_INCLUDE_LANG_CN=y/g" "$FINAL_CONFIG"
             sed -i "s/CONFIG_FIRMWARE_INCLUDE_LANG_RU=y/CONFIG_FIRMWARE_INCLUDE_LANG_RU=n/g" "$FINAL_CONFIG"
             sed -i "s/CONFIG_FIRMWARE_INCLUDE_LANG_UK=y/CONFIG_FIRMWARE_INCLUDE_LANG_UK=n/g" "$FINAL_CONFIG"
          
-            # 4. [地毯式移除 - 究極防漏版]
-            # 目標：不管該選項原本是 =y, =m, 還是 # is not set，通通強制改為 =n
+            # 4. [Carpet-thorough removal - Ultimate leak-proof version]
+            # Objective: Regardless of whether the option was originally =y, =m, or # is not set, force it to be =n.
             echo "::group::Absolute Disable Modules"
             modules=(
               CIFS NTFS_3G LPRD U2EC USBIP HDPARM PARTED SMBD WINS SMBD_SYSLOG TESTPARM 
@@ -413,7 +412,7 @@ jobs:
           echo "::group::Themes Installation"
           
           # Fixen beállítjuk a hivatalos témák repóját, ha a változók üresek lennének
-          THEME_REPO="https://github.com/diablomike20/padavan-themes"
+          THEME_REPO="https://github.com/diablomike20/padavan-themes-lite"
           
           # Kitöröljük a régi felületet, és letöltjük a helyére az új dizájncsomagot
           rm -rf padavan-ng/trunk/user/www/n56u_ribbon_fixed/*
@@ -1929,11 +1928,6 @@ jobs:
           echo "::group::Build Process"
           cp build.config padavan-ng/trunk/.config
           cd padavan-ng/trunk
-          
-          # Új dizájn kényszerítése (átmásoljuk a modern Bootstrap stílust a régi helyére)
-          if [ -d "user/www/n56u_ribbon_fixed/bootstrap" ]; then
-            cp -rf user/www/n56u_ribbon_fixed/bootstrap/* user/www/n56u_ribbon_fixed/common-theme/ 2>/dev/null || true
-          fi
           
           ./clear_tree.sh > /dev/null 2>&1
           rm -rf tmp staging

@@ -171,13 +171,12 @@ on:
           - KN-VIVA
       
       language_select:
-        description: "WebUI 語言設定 (Custom Language Selector)"
+        description: "WebUI (Custom Language Selector)"
         required: true
         type: choice
         default: 'English_Only'
         options:
-          - English_Only
-          - CN (繁體中文)
+          - EN (English)
           - RU (Pусский)
           - BR (Brazil)
           - CZ (Česky)
@@ -192,12 +191,12 @@ on:
           - UK (Українська)
       
       nanoversion:
-        description: "開啟極限瘦身 (Nano Optimization)"
+        description: "(Nano Optimization)"
         type: boolean
         default: true
 
       customization:
-        description: '自訂預設配置 JSON (Custom Default Configuration Wi-Fi/Passwords/IP)'
+        description: 'JSON (Custom Default Configuration Wi-Fi/Passwords/IP)'
         required: true
         type: string
         default: '{"lanip":"192.168.0.1","signaccount":"admin","signpassword":"admin","wifi2gssid":"Padavan","wifi2gpsk":"1234567890","wifi5gssid":"Padavan-5G","wifi5gpsk":"1234567890"}'
@@ -412,14 +411,14 @@ jobs:
       - name: Install themes
         run: |
           echo "::group::Themes Installation"
-          if [ -f "variables" ]; then . variables; fi
-          if [[ -n "${PADAVAN_THEMES[*]}" ]]; then
-            git clone --depth 1 -b "$PADAVAN_THEMES_BRANCH" "$PADAVAN_THEMES_REPO" themes
-            cp -r themes/common-theme themes/jquery.js padavan-ng/trunk/user/www/n56u_ribbon_fixed
-            for theme in "${PADAVAN_THEMES[@]}"; do
-              [ -d "themes/$theme-theme" ] && cp -r "themes/$theme-theme" padavan-ng/trunk/user/www/n56u_ribbon_fixed
-            done
-          fi
+          
+          # Fixen beállítjuk a hivatalos témák repóját, ha a változók üresek lennének
+          THEME_REPO="https://github.com/diablomike20/padavan-themes"
+          
+          # Kitöröljük a régi felületet, és letöltjük a helyére az új dizájncsomagot
+          rm -rf padavan-ng/trunk/user/www/n56u_ribbon_fixed/*
+          git clone --depth 1 $THEME_REPO padavan-ng/trunk/user/www/n56u_ribbon_fixed/
+          
           echo "::endgroup::"
 
       # 7. 修正 mkimage

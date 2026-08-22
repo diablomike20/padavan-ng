@@ -1931,6 +1931,11 @@ jobs:
           cp build.config padavan-ng/trunk/.config
           cd padavan-ng/trunk
           
+          # Új dizájn kényszerítése (átmásoljuk a modern Bootstrap stílust a régi helyére)
+          if [ -d "user/www/n56u_ribbon_fixed/bootstrap" ]; then
+            cp -rf user/www/n56u_ribbon_fixed/bootstrap/* user/www/n56u_ribbon_fixed/common-theme/ 2>/dev/null || true
+          fi
+          
           ./clear_tree.sh > /dev/null 2>&1
           rm -rf tmp staging
           
